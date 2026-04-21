@@ -1,0 +1,105 @@
+services/reviews-service/Dockerfile
+  335d0340cfb7faf8 1-19
+frontend/public/providers.js
+  335d0340cfb7faf8 1-227
+frontend/public/providers.html
+  335d0340cfb7faf8 1-95
+services/items-service/config.py
+  335d0340cfb7faf8 1-24
+services/reviews-service/src/main/java/com/icu/model/ReviewItem.java
+  335d0340cfb7faf8 1-66
+frontend/public/purchases.html
+  335d0340cfb7faf8 1-194
+services/items-service/requirements.txt
+  335d0340cfb7faf8 1-4
+services/reviews-service/src/test/java/com/icu/ReviewsControllerTest.java
+  335d0340cfb7faf8 1-100
+.github/workflows/build.yml
+  335d0340cfb7faf8 1-54
+frontend/public/index.html
+  335d0340cfb7faf8 1-54
+database/README.md
+  335d0340cfb7faf8 1-107
+wiremock/README.md
+  335d0340cfb7faf8 1-211
+services/reviews-service/src/main/java/com/icu/repository/ReviewRepository.java
+  335d0340cfb7faf8 1-9
+services/reviews-service/src/main/java/com/icu/ReviewsApplication.java
+  335d0340cfb7faf8 1-11
+services/items-service/test_items.py
+  335d0340cfb7faf8 1-75
+wiremock/mappings/9_catchall.json
+  335d0340cfb7faf8 1-17
+frontend/public/app.js
+  335d0340cfb7faf8 1-254
+wiremock/mappings/2_throat.json
+  335d0340cfb7faf8 1-17
+frontend/public/items.html
+  335d0340cfb7faf8 1-166
+frontend/package.json
+  335d0340cfb7faf8 1-16
+services/reviews-service/src/main/java/com/icu/controller/ReviewController.java
+  335d0340cfb7faf8 1-147
+docker-compose.yml
+  335d0340cfb7faf8 1-105
+frontend/public/reviews.html
+  335d0340cfb7faf8 1-232
+wiremock/mappings/1_cmot.json
+  335d0340cfb7faf8 1-17
+.gitignore
+  335d0340cfb7faf8 1-46
+services/reviews-service/src/main/java/com/icu/repository/ReviewItemRepository.java
+  335d0340cfb7faf8 1-14
+services/reviews-service/pom.xml
+  335d0340cfb7faf8 1-72
+services/items-service/Dockerfile
+  335d0340cfb7faf8 1-12
+database/init.sql
+  335d0340cfb7faf8 1-43
+services/reviews-service/src/main/java/com/icu/model/Review.java
+  335d0340cfb7faf8 1-67
+README.md
+  335d0340cfb7faf8 1-367
+Problems.md
+  335d0340cfb7faf8 1-603
+services/items-service/README.md
+  335d0340cfb7faf8 1-141
+frontend/server.js
+  335d0340cfb7faf8 1-40
+frontend/public/style.css
+  335d0340cfb7faf8 1-313
+Makefile
+  335d0340cfb7faf8 1-52
+services/reviews-service/README.md
+  335d0340cfb7faf8 1-143
+services/items-service/app.py
+  335d0340cfb7faf8 1-247
+frontend/README.md
+  335d0340cfb7faf8 1-130
+frontend/Dockerfile
+  335d0340cfb7faf8 1-12
+services/reviews-service/src/main/resources/application.properties
+  335d0340cfb7faf8 1-13
+CHANGELOG.md
+  335d0340cfb7faf8 1-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "d61c563f2fb6886dbeee5e7264f949437a6ccec8",
+  "prompts": {
+    "335d0340cfb7faf8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_24e51be80ffeiixp6gFedampkA",
+        "model": "github-copilot/claude-haiku-4.5"
+      },
+      "human_author": "Sasha Bondarev",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4552,
+      "overriden_lines": 0
+    }
+  }
+}
