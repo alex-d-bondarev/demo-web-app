@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "43d3ee4a0224156c5ba92687311a17f63bb2104c",
+  "prompts": {
+    "335d0340cfb7faf8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_24e51be80ffeiixp6gFedampkA",
+        "model": "github-copilot/claude-haiku-4.5"
+      },
+      "human_author": "Sasha Bondarev",
+      "messages": [],
+      "total_additions": 6214,
+      "total_deletions": 104,
+      "accepted_lines": 4552,
+      "overriden_lines": 0
+    }
+  }
+}
