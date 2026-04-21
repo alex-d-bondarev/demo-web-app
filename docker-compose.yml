@@ -1,0 +1,105 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: icu_v1
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'no'
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - icu_db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - icu-network
+
+  # WireMock Mock Server
+  wiremock:
+    image: wiremock/wiremock:latest
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+      - ./wiremock/__files:/home/wiremock/__files
+    ports:
+      - "8080:8080"
+    networks:
+      - icu-network
+
+   # Items Service (Python/Flask)
+  items-service:
+    build:
+      context: ./services/items-service
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: icu_v1
+      DB_USER: root
+      DB_PASSWORD: root
+      WIREMOCK_URL: http://wiremock:8080
+      FLASK_ENV: development
+      FLASK_PORT: 5001
+    ports:
+      - "5001:5001"
+      - "5678:5678"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./services/items-service:/app
+    networks:
+      - icu-network
+
+  # Reviews Service (Java/Spring Boot)
+  reviews-service:
+    build:
+      context: ./services/reviews-service
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: icu_v1
+      DB_USER: root
+      DB_PASSWORD: root
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "8081:8081"
+      - "5005:5005"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - icu-network
+
+  # Frontend Service (Node.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      ITEMS_SERVICE_URL: http://items-service:5000
+      REVIEWS_SERVICE_URL: http://reviews-service:8081
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - items-service
+      - reviews-service
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - icu-network
+
+volumes:
+  icu_db_data:
+    driver: local
+
+networks:
+  icu-network:
+    driver: bridge

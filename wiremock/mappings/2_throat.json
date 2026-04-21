@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/provider/Throat",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "status": "failed"
+    }
+  }
+}

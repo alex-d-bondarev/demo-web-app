@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Management - ICU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Inventory Control Utility (ICU) v1.0.0</h1>
+    </header>
+    
+    <nav>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="items.html" class="nav-link">Items</a>
+        <a href="purchases.html" class="nav-link">Purchases</a>
+        <a href="reviews.html" class="nav-link" style="background-color: #2c3e50;">Reviews</a>
+        <a href="providers.html" class="nav-link">Providers</a>
+    </nav>
+    
+    <main>
+        <div id="message" class="message"></div>
+        
+        <div class="container">
+            <h2>Reviews Management</h2>
+            
+            <!-- Create Review Form -->
+            <form id="createReviewForm">
+                <h3>Create New Review</h3>
+                <div class="form-group">
+                    <label for="review_id">Review ID</label>
+                    <input type="number" id="review_id" name="review_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_dt">Start Date/Time</label>
+                    <input type="datetime-local" id="start_dt" name="start_dt" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_dt">End Date/Time</label>
+                    <input type="datetime-local" id="end_dt" name="end_dt" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" placeholder="e.g., in-progress, completed" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Review</button>
+            </form>
+            
+            <!-- List Reviews -->
+            <h3 style="margin-top: 2rem;">Reviews List</h3>
+            <button class="btn-secondary" onclick="loadReviews()">Load Reviews</button>
+            <div id="reviewsTable"></div>
+        </div>
+    </main>
+    
+    <script src="app.js"></script>
+    <script>
+        const REVIEWS_URL = window.location.protocol + '//' + window.location.hostname + ':8081';
+        
+        // Create review
+        document.getElementById('createReviewForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                review_id: parseInt(formData.get('review_id')),
+                start_dt: formData.get('start_dt').replace('T', ' ') + ':00',
+                end_dt: formData.get('end_dt').replace('T', ' ') + ':00',
+                status: formData.get('status')
+            };
+            
+            const result = await API.fetchAPI(`${REVIEWS_URL}/review`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            if (result.success && result.data.status === 'created') {
+                API.showMessage('Review created successfully!', 'success');
+                e.target.reset();
+                loadReviews();
+            } else {
+                API.showMessage('Error creating review', 'error');
+            }
+        };
+        
+        // Load reviews
+        async function loadReviews() {
+            const result = await API.fetchAPI(`${REVIEWS_URL}/review`);
+            
+            if (result.success && Array.isArray(result.data)) {
+                let html = '<table><thead><tr><th>Review ID</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Action</th></tr></thead><tbody>';
+                result.data.forEach(review => {
+                    html += `
+                        <tr>
+                            <td>${review.review_id}</td>
+                            <td>${review.status}</td>
+                            <td>${review.start_dt}</td>
+                            <td>${review.end_dt}</td>
+                            <td>
+                                <button class="btn-secondary" onclick="viewReview(${review.review_id})">Items</button>
+                                <button class="btn-danger" onclick="deleteReview(${review.review_id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                document.getElementById('reviewsTable').innerHTML = html;
+            } else {
+                document.getElementById('reviewsTable').innerHTML = '<p>Error loading reviews</p>';
+            }
+        }
+        
+        // View review items
+        async function viewReview(reviewId) {
+            const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}/item`);
+            
+            if (result.success) {
+                const items = result.data || [];
+                let html = `
+                    <div class="container" style="margin-top: 1rem;">
+                        <h3>Review #${reviewId} Items</h3>
+                `;
+                
+                if (items.length > 0) {
+                    html += '<table><thead><tr><th>Item ID</th><th>Review Item ID</th><th>Quantity</th><th>Action</th></tr></thead><tbody>';
+                    items.forEach(item => {
+                        html += `
+                            <tr>
+                                <td>${item.item_id}</td>
+                                <td>${item.review_item_id}</td>
+                                <td>${item.quantity}</td>
+                                <td>
+                                    <button class="btn-danger" onclick="deleteReviewItem(${reviewId}, ${item.review_item_id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p>No items in this review</p>';
+                }
+                
+                html += `
+                    <h4 style="margin-top: 1.5rem;">Add Item to Review</h4>
+                    <form id="addReviewItemForm">
+                        <div class="form-group">
+                            <label for="ri_id">Review Item ID</label>
+                            <input type="number" id="ri_id" name="ri_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item_id">Item ID</label>
+                            <input type="number" id="item_id" name="item_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" name="quantity" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Add Item</button>
+                    </form>
+                    
+                    <button class="btn-secondary" onclick="loadReviews(); document.querySelectorAll('.container')[1].remove();">Back</button>
+                    </div>
+                `;
+                
+                document.getElementById('reviewsTable').insertAdjacentHTML('afterend', html);
+                
+                document.getElementById('addReviewItemForm').onsubmit = async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const data = {
+                        review_item_id: parseInt(formData.get('ri_id')),
+                        review_id: reviewId,
+                        item_id: parseInt(formData.get('item_id')),
+                        quantity: parseInt(formData.get('quantity'))
+                    };
+                    
+                    const addResult = await API.fetchAPI(
+                        `${REVIEWS_URL}/review/${reviewId}/item/${data.review_item_id}`,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify(data)
+                        }
+                    );
+                    
+                    if (addResult.success && addResult.data.status === 'added') {
+                        API.showMessage('Item added to review!', 'success');
+                        e.target.reset();
+                    } else {
+                        API.showMessage('Error adding item', 'error');
+                    }
+                };
+            }
+        }
+        
+        // Delete review item
+        async function deleteReviewItem(reviewId, itemId) {
+            if (!confirm('Delete this item from review?')) return;
+            
+            const result = await API.fetchAPI(
+                `${REVIEWS_URL}/review/${reviewId}/item/${itemId}`,
+                { method: 'DELETE' }
+            );
+            
+            if (result.success && result.data.status === 'deleted') {
+                API.showMessage('Item deleted from review', 'success');
+                viewReview(reviewId);
+            } else {
+                API.showMessage('Error deleting item', 'error');
+            }
+        }
+        
+        // Delete review
+        async function deleteReview(reviewId) {
+            if (!confirm(`Delete review ${reviewId}?`)) return;
+            
+            const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}`, {
+                method: 'DELETE'
+            });
+            
+            if (result.success && result.data.status === 'deleted') {
+                API.showMessage('Review deleted successfully', 'success');
+                loadReviews();
+            } else {
+                API.showMessage('Error deleting review', 'error');
+            }
+        }
+        
+        // Load reviews on page load
+        window.onload = loadReviews;
+    </script>
+</body>
+</html>

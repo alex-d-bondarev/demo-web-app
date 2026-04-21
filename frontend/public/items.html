@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items Management - ICU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Inventory Control Utility (ICU) v1.0.0</h1>
+    </header>
+    
+    <nav>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="items.html" class="nav-link" style="background-color: #2c3e50;">Items</a>
+        <a href="purchases.html" class="nav-link">Purchases</a>
+        <a href="reviews.html" class="nav-link">Reviews</a>
+        <a href="providers.html" class="nav-link">Providers</a>
+    </nav>
+    
+    <main>
+        <div id="message" class="message"></div>
+        
+        <div class="container">
+            <h2>Items Management</h2>
+            
+            <!-- Create Item Form -->
+            <form id="createItemForm">
+                <h3>Create New Item</h3>
+                <div class="form-group">
+                    <label for="item_id">Item ID</label>
+                    <input type="number" id="item_id" name="item_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="optimal_stock">Optimal Stock</label>
+                    <input type="number" id="optimal_stock" name="optimal_stock" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="number" id="price" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="volume">Volume</label>
+                    <input type="number" id="volume" name="volume" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight</label>
+                    <input type="number" id="weight" name="weight" step="0.01" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Item</button>
+            </form>
+            
+            <!-- List Items -->
+            <h3 style="margin-top: 2rem;">Items List</h3>
+            <button class="btn-secondary" onclick="loadItems()">Load Items</button>
+            <div id="itemsTable"></div>
+        </div>
+    </main>
+    
+    <script src="app.js"></script>
+    <script>
+        const ITEMS_URL = window.location.protocol + '//' + window.location.hostname + ':5000';
+        
+        // Create item
+        document.getElementById('createItemForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            // Convert to proper types
+            data.item_id = parseInt(data.item_id);
+            data.optimal_stock = parseInt(data.optimal_stock);
+            data.price = parseFloat(data.price);
+            data.volume = parseFloat(data.volume);
+            data.weight = parseFloat(data.weight);
+            
+            const result = await API.fetchAPI(`${ITEMS_URL}/item`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            if (result.success && result.data.status === 'created') {
+                API.showMessage('Item created successfully!', 'success');
+                e.target.reset();
+                loadItems();
+            } else {
+                API.showMessage('Error creating item', 'error');
+            }
+        };
+        
+        // Load items
+        async function loadItems() {
+            const result = await API.fetchAPI(`${ITEMS_URL}/item`);
+            
+            if (result.success && Array.isArray(result.data)) {
+                let html = '<table><thead><tr><th>Item ID</th><th>Name</th><th>Action</th></tr></thead><tbody>';
+                result.data.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>${item.item_id}</td>
+                            <td>${item.name}</td>
+                            <td>
+                                <button class="btn-secondary" onclick="viewItem(${item.item_id})">View</button>
+                                <button class="btn-danger" onclick="deleteItem(${item.item_id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                document.getElementById('itemsTable').innerHTML = html;
+            } else {
+                document.getElementById('itemsTable').innerHTML = '<p>Error loading items</p>';
+            }
+        }
+        
+        // View item details
+        async function viewItem(itemId) {
+            const result = await API.fetchAPI(`${ITEMS_URL}/item/${itemId}`);
+            
+            if (result.success) {
+                const item = result.data;
+                const details = `
+                    <div class="container" style="margin-top: 1rem;">
+                        <h3>Item Details</h3>
+                        <table>
+                            <tr><th>Field</th><th>Value</th></tr>
+                            <tr><td>Item ID</td><td>${item.item_id}</td></tr>
+                            <tr><td>Name</td><td>${item.name}</td></tr>
+                            <tr><td>Optimal Stock</td><td>${item.optimal_stock}</td></tr>
+                            <tr><td>Price</td><td>$${item.price}</td></tr>
+                            <tr><td>Volume</td><td>${item.volume}</td></tr>
+                            <tr><td>Weight</td><td>${item.weight}</td></tr>
+                        </table>
+                        <button class="btn-secondary" onclick="loadItems(); document.querySelectorAll('.container')[1].remove();">Back</button>
+                    </div>
+                `;
+                document.getElementById('itemsTable').insertAdjacentHTML('afterend', details);
+            }
+        }
+        
+        // Delete item
+        async function deleteItem(itemId) {
+            if (!confirm(`Delete item ${itemId}?`)) return;
+            
+            const result = await API.fetchAPI(`${ITEMS_URL}/item/${itemId}`, {
+                method: 'DELETE'
+            });
+            
+            if (result.success && result.data.status === 'deleted') {
+                API.showMessage('Item deleted successfully', 'success');
+                loadItems();
+            } else {
+                API.showMessage('Error deleting item', 'error');
+            }
+        }
+        
+        // Load items on page load
+        window.onload = loadItems;
+    </script>
+</body>
+</html>
