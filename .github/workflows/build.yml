@@ -35,7 +35,7 @@ jobs:
         run: docker compose exec -T items-service python -m pytest test_items.py -v
       
       - name: Run Reviews Service Tests
-        run: docker compose exec -T reviews-service mvn test
+        run: docker compose exec -T reviews-service mvn -f /build/pom.xml test
       
       - name: Verify API Endpoints
         run: |
