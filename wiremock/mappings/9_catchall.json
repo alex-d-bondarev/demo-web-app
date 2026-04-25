@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/provider/.*",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "status": "success"
+    }
+  }
+}

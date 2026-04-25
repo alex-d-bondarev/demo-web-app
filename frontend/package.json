@@ -1,0 +1,16 @@
+{
+  "name": "icu-frontend",
+  "version": "1.0.0",
+  "description": "ICU Frontend Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["icu", "inventory", "frontend"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

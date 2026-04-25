@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchases Management - ICU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Inventory Control Utility (ICU) v1.0.0</h1>
+    </header>
+    
+    <nav>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="items.html" class="nav-link">Items</a>
+        <a href="purchases.html" class="nav-link" style="background-color: #2c3e50;">Purchases</a>
+        <a href="reviews.html" class="nav-link">Reviews</a>
+        <a href="providers.html" class="nav-link">Providers</a>
+    </nav>
+    
+    <main>
+        <div id="message" class="message"></div>
+        
+        <div class="container">
+            <h2>Purchases Management</h2>
+            
+            <!-- Create Purchase Form -->
+            <form id="createPurchaseForm">
+                <h3>Create New Purchase Order</h3>
+                <div class="form-group">
+                    <label for="po_id">Purchase Order ID</label>
+                    <input type="number" id="po_id" name="po_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="provider">Provider</label>
+                    <input type="text" id="provider" name="provider" placeholder="e.g., Supplier A, CMOT, Throat" required>
+                </div>
+                <div class="form-group">
+                    <label for="created_dt">Created Date/Time</label>
+                    <input type="datetime-local" id="created_dt" name="created_dt" required>
+                </div>
+                <div class="form-group">
+                    <label for="delivered_dt">Delivered Date/Time</label>
+                    <input type="datetime-local" id="delivered_dt" name="delivered_dt" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" placeholder="e.g., pending, delivered" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Purchase</button>
+            </form>
+            
+            <!-- List Purchases -->
+            <h3 style="margin-top: 2rem;">Purchase Orders List</h3>
+            <button class="btn-secondary" onclick="loadPurchases()">Load Purchases</button>
+            <div id="purchasesTable"></div>
+        </div>
+    </main>
+    
+    <script src="app.js"></script>
+    <script>
+        const ITEMS_URL = window.location.protocol + '//' + window.location.hostname + ':5000';
+        
+        // Create purchase
+        document.getElementById('createPurchaseForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                purchase_order_id: parseInt(formData.get('po_id')),
+                provider: formData.get('provider'),
+                created_dt: formData.get('created_dt').replace('T', ' ') + ':00',
+                delivered_dt: formData.get('delivered_dt').replace('T', ' ') + ':00',
+                status: formData.get('status')
+            };
+            
+            const result = await API.fetchAPI(`${ITEMS_URL}/purchase`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            if (result.success && result.data.status === 'created') {
+                API.showMessage('Purchase order created successfully!', 'success');
+                e.target.reset();
+                loadPurchases();
+            } else {
+                API.showMessage('Error creating purchase order', 'error');
+            }
+        };
+        
+        // Load purchases
+        async function loadPurchases() {
+            const result = await API.fetchAPI(`${ITEMS_URL}/purchase`);
+            
+            if (result.success && Array.isArray(result.data)) {
+                let html = '<table><thead><tr><th>PO ID</th><th>Provider</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>';
+                result.data.forEach(po => {
+                    html += `
+                        <tr>
+                            <td>${po.purchase_order_id}</td>
+                            <td>${po.provider}</td>
+                            <td>${po.status}</td>
+                            <td>${po.created_dt}</td>
+                            <td>
+                                <button class="btn-secondary" onclick="viewPurchase(${po.purchase_order_id})">Details</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                document.getElementById('purchasesTable').innerHTML = html;
+            } else {
+                document.getElementById('purchasesTable').innerHTML = '<p>Error loading purchase orders</p>';
+            }
+        }
+        
+        // View purchase details and add items
+        async function viewPurchase(poId) {
+            const result = await API.fetchAPI(`${ITEMS_URL}/purchase`);
+            const po = result.data.find(p => p.purchase_order_id === poId);
+            
+            if (!po) return;
+            
+            let html = `
+                <div class="container" style="margin-top: 1rem;">
+                    <h3>Purchase Order #${poId} Details</h3>
+                    <table>
+                        <tr><th>Field</th><th>Value</th></tr>
+                        <tr><td>PO ID</td><td>${po.purchase_order_id}</td></tr>
+                        <tr><td>Provider</td><td>${po.provider}</td></tr>
+                        <tr><td>Status</td><td>${po.status}</td></tr>
+                        <tr><td>Created</td><td>${po.created_dt}</td></tr>
+                        <tr><td>Delivered</td><td>${po.delivered_dt}</td></tr>
+                    </table>
+                    
+                    <h4 style="margin-top: 1.5rem;">Add Item to Purchase</h4>
+                    <form id="addItemForm">
+                        <div class="form-group">
+                            <label for="poi_id">Purchase Order Item ID</label>
+                            <input type="number" id="poi_id" name="poi_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item_id">Item ID</label>
+                            <input type="number" id="item_id" name="item_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" name="quantity" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item_price">Price</label>
+                            <input type="number" id="item_price" name="item_price" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Add Item</button>
+                    </form>
+                    
+                    <button class="btn-secondary" onclick="loadPurchases(); document.querySelectorAll('.container')[1].remove();">Back</button>
+                </div>
+            `;
+            document.getElementById('purchasesTable').insertAdjacentHTML('afterend', html);
+            
+            document.getElementById('addItemForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = {
+                    purchase_order_item_id: parseInt(formData.get('poi_id')),
+                    item_id: parseInt(formData.get('item_id')),
+                    purchase_order_id: poId,
+                    quantity: parseInt(formData.get('quantity')),
+                    price: parseFloat(formData.get('item_price'))
+                };
+                
+                const addResult = await API.fetchAPI(
+                    `${ITEMS_URL}/purchase/${poId}/item`,
+                    {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    }
+                );
+                
+                if (addResult.success && addResult.data.status === 'added') {
+                    API.showMessage('Item added to purchase!', 'success');
+                    e.target.reset();
+                } else {
+                    API.showMessage('Error adding item', 'error');
+                }
+            };
+        }
+        
+        // Load purchases on page load
+        window.onload = loadPurchases;
+    </script>
+</body>
+</html>

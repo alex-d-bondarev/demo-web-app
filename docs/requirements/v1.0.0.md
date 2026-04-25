@@ -12,14 +12,15 @@ Create an Inventory Control Utility web app named ICU version 1.0.0
 	- standard REST conventions
 		- including response best practicies
 	- URL consistency
-	- database indexes and foreign keys
+	- data consistency and performance
+		- For example no foreign keys, indexes and primary keys in the database
 3. Version 1.0.0 should be limited to HTML, CSS, JavaScript, Node JS, Java with Spring Boot, Python with Flask, MySQL database, GitHub Actions, Makefile, Docker, Docker Compose.
 4. Utilise a Front End node js service, Java Service, Python service, MySQL database and a WireMock for technology learning purposes.
 5. All API should respond with status code == 200
 
 ## Functionality
 
-Inventory Control Utility should be able to create users, monitor and maintain stock, calculate income / expenses / profits / loss.
+Inventory Control Utility should be able to monitor and maintain stock, calculate income / expenses / profits / loss.
 
 ## Data model
 
