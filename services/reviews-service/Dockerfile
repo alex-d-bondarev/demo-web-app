@@ -11,6 +11,6 @@ WORKDIR /app
 
 RUN cp /build/target/reviews-service-*.jar app.jar
 
-EXPOSE 8081 5005
+EXPOSE 9030 9031
 
 CMD ["java", "-jar", "app.jar"]

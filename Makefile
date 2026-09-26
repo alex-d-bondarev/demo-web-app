@@ -41,12 +41,12 @@ logs-mysql:
 	docker compose logs -f mysql
 
 shell-mysql:
-	docker compose exec mysql mysql -u root -proot icu_v1
+	docker compose exec mysql mysql -u root -proot im_db
 
 test:
 	docker compose exec -T items-service python -m pytest test_items.py -v
 	docker compose exec -T reviews-service mvn test
 
 clean:
-	docker compose down
-	docker rmi demo-web-app-items-service demo-web-app-reviews-service demo-web-app-frontend 2>/dev/null || true
+	docker compose down --rmi local
+	docker volume prune -f

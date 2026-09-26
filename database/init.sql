@@ -1,6 +1,6 @@
 -- Create database
-CREATE DATABASE IF NOT EXISTS icu_v1;
-USE icu_v1;
+CREATE DATABASE IF NOT EXISTS im_db;
+USE im_db;
 
 -- Create tables (NO PRIMARY KEYS per requirements)
 CREATE TABLE IF NOT EXISTS item (

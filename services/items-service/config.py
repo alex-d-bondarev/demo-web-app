@@ -5,17 +5,17 @@ class Config:
     
     # Database
     DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_PORT = int(os.getenv('DB_PORT', 3306))
-    DB_NAME = os.getenv('DB_NAME', 'icu_v1')
+    DB_PORT = int(os.getenv('DB_PORT', 9050))
+    DB_NAME = os.getenv('DB_NAME', 'im_db')
     DB_USER = os.getenv('DB_USER', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', 'root')
     
     # WireMock
-    WIREMOCK_URL = os.getenv('WIREMOCK_URL', 'http://localhost:8080')
+    WIREMOCK_URL = os.getenv('WIREMOCK_URL', 'http://localhost:9040')
     
     # Flask
     FLASK_ENV = os.getenv('FLASK_ENV', 'development')
-    FLASK_PORT = os.getenv('FLASK_PORT', 5001)
+    FLASK_PORT = os.getenv('FLASK_PORT', 9020)
     DEBUG = FLASK_ENV == 'development'
     
     @staticmethod
