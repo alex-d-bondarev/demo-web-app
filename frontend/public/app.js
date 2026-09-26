@@ -1,21 +1,21 @@
 // API Configuration
 const API_CONFIG = {
-    ITEMS_URL: 'http://items-service:5001',
-    REVIEWS_URL: 'http://reviews-service:8081',
-    WIREMOCK_URL: 'http://wiremock:8080'
+    ITEMS_URL: 'http://items-service:9020',
+    REVIEWS_URL: 'http://reviews-service:9030',
+    WIREMOCK_URL: 'http://wiremock:9040'
 };
 
 // Get URLs from window location for browser-based requests
 function getItemsServiceUrl() {
-    return window.location.protocol + '//' + window.location.hostname + ':5001';
+    return window.location.protocol + '//' + window.location.hostname + ':9020';
 }
 
 function getReviewsServiceUrl() {
-    return window.location.protocol + '//' + window.location.hostname + ':8081';
+    return window.location.protocol + '//' + window.location.hostname + ':9030';
 }
 
 function getWiremockUrl() {
-    return window.location.protocol + '//' + window.location.hostname + ':8080';
+    return window.location.protocol + '//' + window.location.hostname + ':9040';
 }
 
 /**

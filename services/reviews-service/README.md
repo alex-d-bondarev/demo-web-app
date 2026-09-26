@@ -1,25 +1,7 @@
 # Reviews Service
 
-## Overview
-
-Java/Spring Boot microservice for managing inventory reviews and review items. Implements CRUD operations for reviews and their associated items.
-
-## Technology Stack
-
-- Java 17
-- Spring Boot 3.1.5
-- Spring Data JPA
-- MySQL 8.0
-- Maven
-- Docker
-
-## Environment Variables
-
-- `DB_HOST` - MySQL host (default: localhost)
-- `DB_PORT` - MySQL port (default: 3306)
-- `DB_NAME` - Database name (default: icu_v1)
-- `DB_USER` - Database user (default: root)
-- `DB_PASSWORD` - Database password (default: root)
+Manage inventory reviews and review items.
+For database see [database README.md](../../database/README.md)
 
 ## Running Locally
 
@@ -36,8 +18,8 @@ mvn clean package
 
 # Set environment variables (optional)
 export DB_HOST=localhost
-export DB_PORT=3306
-export DB_NAME=icu_v1
+export DB_PORT=9050
+export DB_NAME=im_db
 export DB_USER=root
 export DB_PASSWORD=root
 
@@ -45,7 +27,24 @@ export DB_PASSWORD=root
 java -jar target/reviews-service-1.0.0.jar
 ```
 
-The service will start on `http://localhost:8081`
+The service will start on `http://localhost:9030`
+
+## Docker
+
+Build image:
+```bash
+docker build -t reviews-service .
+```
+
+Run container:
+```bash
+docker run -p 9030:9030 -p 9031:9031 \
+  -e DB_HOST=mysql \
+  -e DB_NAME=im_db \
+  -e DB_USER=root \
+  -e DB_PASSWORD=root \
+  reviews-service
+```
 
 ## API Endpoints
 
@@ -77,67 +76,10 @@ docker-compose exec reviews-service mvn test
 mvn test
 ```
 
-## Debugging
-
-### Remote Debugging with JDWP
-
-The service supports remote debugging on port 5005.
-
-#### Setup in IDE (IntelliJ IDEA):
-1. Go to `Run → Edit Configurations`
-2. Create new `Remote JVM Debug` configuration
-3. Set Host: `localhost`
-4. Set Port: `5005`
-5. Click Debug
-
-#### Or via Docker Compose:
-The `docker-compose.yml` already exposes port 5005 for debugging.
-
-### Enable in Dockerfile:
-The JDWP agent is configured via JAVA_OPTS:
-```
-JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-```
-
-## Docker
-
-Build image:
-```bash
-docker build -t reviews-service .
-```
-
-Run container:
-```bash
-docker run -p 8081:8081 -p 5005:5005 \
-  -e DB_HOST=mysql \
-  -e DB_NAME=icu_v1 \
-  -e DB_USER=root \
-  -e DB_PASSWORD=root \
-  reviews-service
-```
-
-## Database
-
-See `database/README.md` for database schema and operations.
-
-## Project Structure
-
-```
-src/main/java/com/icu/
-├── ReviewsApplication.java      # Spring Boot entry point
-├── controller/
-│   └── ReviewController.java    # REST endpoints
-├── model/
-│   ├── Review.java             # Review entity
-│   └── ReviewItem.java         # ReviewItem entity
-└── repository/
-    ├── ReviewRepository.java   # Review data access
-    └── ReviewItemRepository.java # ReviewItem data access
-```
-
-## Notes
-
-- All endpoints return HTTP 200 status code (per v1.0.0 requirements)
-- Error handling: Catch all exceptions and return error status in JSON body
-- No request validation (minimal implementation for v1.0.0)
-- JPA entities use `@Id` annotation but no `@GeneratedValue` (IDs provided by client)
+## Debugging via IntelliJ IDEA:
+1. The `docker-compose.yml` already exposes port 9031 for debugging.
+2. Go to `Run → Edit Configurations`
+3. Create new `Remote JVM Debug` configuration
+4. Set Host: `localhost`
+5. Set Port: `9031`
+6. Click Debug

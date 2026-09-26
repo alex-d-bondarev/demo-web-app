@@ -3,14 +3,14 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_DATABASE: icu_v1
+      MYSQL_DATABASE: im_db
       MYSQL_ROOT_PASSWORD: root
       MYSQL_ALLOW_EMPTY_PASSWORD: 'no'
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - icu_db_data:/var/lib/mysql
+      - im_db_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "9050:9050"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -26,7 +26,7 @@ services:
       - ./wiremock/mappings:/home/wiremock/mappings
       - ./wiremock/__files:/home/wiremock/__files
     ports:
-      - "8080:8080"
+      - "9040:9040"
     networks:
       - icu-network
 
@@ -37,16 +37,15 @@ services:
       dockerfile: Dockerfile
     environment:
       DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: icu_v1
+      DB_PORT: 9050
+      DB_NAME: im_db
       DB_USER: root
       DB_PASSWORD: root
-      WIREMOCK_URL: http://wiremock:8080
+      WIREMOCK_URL: http://wiremock:9040
       FLASK_ENV: development
-      FLASK_PORT: 5001
+      FLASK_PORT: 9020
     ports:
-      - "5001:5001"
-      - "5678:5678"
+      - "9020:9020"
     depends_on:
       mysql:
         condition: service_healthy
@@ -62,14 +61,14 @@ services:
       dockerfile: Dockerfile
     environment:
       DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: icu_v1
+      DB_PORT: 9050
+      DB_NAME: im_db
       DB_USER: root
       DB_PASSWORD: root
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9031"
     ports:
-      - "8081:8081"
-      - "5005:5005"
+      - "9030:9030"
+      - "9031:9031"
     depends_on:
       mysql:
         condition: service_healthy
@@ -82,11 +81,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      ITEMS_SERVICE_URL: http://items-service:5000
-      REVIEWS_SERVICE_URL: http://reviews-service:8081
+      ITEMS_SERVICE_URL: http://items-service:9020
+      REVIEWS_SERVICE_URL: http://reviews-service:9030
       NODE_ENV: development
     ports:
-      - "3000:3000"
+      - "9010:9010"
     depends_on:
       - items-service
       - reviews-service
@@ -97,7 +96,7 @@ services:
       - icu-network
 
 volumes:
-  icu_db_data:
+  im_db_data:
     driver: local
 
 networks:

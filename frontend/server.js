@@ -2,10 +2,10 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9010;
 
-const ITEMS_SERVICE_URL = process.env.ITEMS_SERVICE_URL || 'http://localhost:5000';
-const REVIEWS_SERVICE_URL = process.env.REVIEWS_SERVICE_URL || 'http://localhost:8081';
+const ITEMS_SERVICE_URL = process.env.ITEMS_SERVICE_URL || 'http://localhost:9020';
+const REVIEWS_SERVICE_URL = process.env.REVIEWS_SERVICE_URL || 'http://localhost:9030';
 
 // Middleware
 app.use(express.json());

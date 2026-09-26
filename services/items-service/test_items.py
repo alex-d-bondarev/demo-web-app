@@ -3,7 +3,7 @@ import requests
 import json
 import time
 
-BASE_URL = "http://127.0.0.1:5001"
+BASE_URL = "http://127.0.0.1:9020"
 
 # Wait for service to be ready
 time.sleep(2)

@@ -243,5 +243,5 @@ def internal_error(error):
     return jsonify({"status": "error", "message": "Internal server error"}), 200
 
 if __name__ == '__main__':
-    port = int(Config.FLASK_PORT) if hasattr(Config, 'FLASK_PORT') and Config.FLASK_PORT else 5001
+    port = int(Config.FLASK_PORT) if hasattr(Config, 'FLASK_PORT') and Config.FLASK_PORT else 9020
     app.run(host='0.0.0.0', port=port, debug=Config.DEBUG)

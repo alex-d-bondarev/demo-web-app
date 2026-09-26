@@ -1,32 +1,8 @@
 # Items Service
 
-## Overview
-
-Python/Flask microservice for managing items and purchase orders. Implements CRUD operations for items and purchase orders, and integrates with WireMock for testing provider endpoints.
-
-## Technology Stack
-
-- Python 3.11
-- Flask 3.0.0
-- PyMySQL for database connectivity
-- Docker for containerization
-
-## Environment Variables
-
-- `DB_HOST` - MySQL host (default: localhost)
-- `DB_PORT` - MySQL port (default: 3306)
-- `DB_NAME` - Database name (default: icu_v1)
-- `DB_USER` - Database user (default: root)
-- `DB_PASSWORD` - Database password (default: root)
-- `WIREMOCK_URL` - WireMock base URL (default: http://localhost:8080)
-- `FLASK_ENV` - Flask environment (default: development)
-
-## Running Locally
-
-### Prerequisites
-- Python 3.11+
-- MySQL server running
-- Virtual environment (recommended)
+Manage items and purchase orders. 
+Providers are mocked, see [wiremock README.md](../../wiremock/README.md).
+For database see [database README.md](../../database/README.md)
 
 ### Setup
 
@@ -40,16 +16,17 @@ pip install -r requirements.txt
 
 # Set environment variables (optional)
 export DB_HOST=localhost
-export DB_PORT=3306
-export DB_NAME=icu_v1
+export DB_PORT=9050
+export DB_NAME=im_db
 export DB_USER=root
 export DB_PASSWORD=root
+export FLASK_PORT=9020
 
 # Run application
 python app.py
 ```
 
-The service will start on `http://localhost:5000`
+The service will start on `http://localhost:9020`
 
 ## API Endpoints
 
@@ -88,31 +65,6 @@ pip install pytest requests
 pytest test_items.py -v
 ```
 
-## Debugging
-
-### With Python debugger (pdb)
-
-```python
-# Add breakpoint in code
-import pdb; pdb.set_trace()
-```
-
-Then run:
-```bash
-docker-compose exec -it items-service python app.py
-```
-
-### With debugpy (remote debugging)
-
-1. Install debugpy: `pip install debugpy`
-2. Modify app.py to include:
-   ```python
-   import debugpy
-   debugpy.listen(("0.0.0.0", 5678))
-   debugpy.wait_for_client()
-   ```
-3. Connect IDE debugger to localhost:5678
-
 ## Docker
 
 Build image:
@@ -122,20 +74,11 @@ docker build -t items-service .
 
 Run container:
 ```bash
-docker run -p 5000:5000 \
+docker run -p 9020:9020 \
   -e DB_HOST=mysql \
-  -e DB_NAME=icu_v1 \
+  -e DB_NAME=im_db \
   -e DB_USER=root \
   -e DB_PASSWORD=root \
+  -e FLASK_PORT=9020 \
   items-service
 ```
-
-## Database
-
-See `database/README.md` for database schema and operations.
-
-## Notes
-
-- All endpoints return HTTP 200 status code (per v1.0.0 requirements)
-- Error handling: Catch all exceptions and return error status in JSON body
-- No request validation (minimal implementation for v1.0.0)
