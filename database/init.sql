@@ -29,14 +29,14 @@ CREATE TABLE IF NOT EXISTS purchase_order_item (
 );
 
 CREATE TABLE IF NOT EXISTS review (
-  review_id INT,
+  review_id INT PRIMARY KEY,
   start_dt DATETIME,
   end_dt DATETIME,
   status VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS review_item (
-  review_item_id INT,
+  review_item_id INT PRIMARY KEY,
   review_id INT,
   item_id INT,
   quantity INT
