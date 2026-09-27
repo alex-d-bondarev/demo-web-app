@@ -44,8 +44,12 @@ shell-mysql:
 	docker compose exec mysql mysql -u root -proot im_db
 
 test:
+	@echo "\n==== Start python test in items-service ====\n"
 	docker compose exec -T items-service python -m pytest test_items.py -v
-	docker compose exec -T reviews-service mvn test
+	@echo "\n==== Finish python test in items-service ====\n"
+	@echo "\n==== Start java test in reviews-service ====\n"
+	docker compose exec -T reviews-service mvn -f /build/pom.xml test
+	@echo "\n==== Finish java test in reviews-service ====\n"
 
 clean:
 	docker compose down --rmi local

@@ -7,6 +7,7 @@ import com.icu.repository.ReviewItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ public class ReviewController {
      * POST /review - Create new review
      */
     @PostMapping("/review")
+    @Transactional
     public ResponseEntity<?> createReview(@RequestBody Review review) {
         try {
             reviewRepository.save(review);
@@ -56,6 +58,7 @@ public class ReviewController {
      * DELETE /review/<review_id> - Delete review
      */
     @DeleteMapping("/review/{review_id}")
+    @Transactional
     public ResponseEntity<?> deleteReview(@PathVariable Integer review_id) {
         try {
             reviewRepository.deleteById(review_id);
@@ -86,6 +89,7 @@ public class ReviewController {
      * POST /review/<review_id>/item/<review_item_id> - Add item to review
      */
     @PostMapping("/review/{review_id}/item/{review_item_id}")
+    @Transactional
     public ResponseEntity<?> addReviewItem(
             @PathVariable Integer review_id,
             @PathVariable Integer review_item_id,
@@ -104,6 +108,7 @@ public class ReviewController {
      * DELETE /review/<review_id>/item/<review_item_id> - Delete review item
      */
     @DeleteMapping("/review/{review_id}/item/{review_item_id}")
+    @Transactional
     public ResponseEntity<?> deleteReviewItem(
             @PathVariable Integer review_id,
             @PathVariable Integer review_item_id) {
