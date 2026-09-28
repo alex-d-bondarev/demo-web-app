@@ -27,7 +27,6 @@ class ItemPath(BaseModel):
 
 class PurchaseOrderItemCreateSchema(BaseModel):
     item_id: int = Field(..., description="Reference to item.item_id")
-    purchase_order_id: int = Field(..., description="Reference to purchase_order.purchase_order_id")
     price: float = Field(..., gt=0, description="Current price (must be greater than 0)")
     quantity: int = Field(..., gt=0, description="Quantity (must be greater than 0)")
 
@@ -201,8 +200,6 @@ def create_purchase():
 def add_purchase_item(path: PurchaseOrderPath, body: PurchaseOrderItemCreateSchema):
     """POST /purchase/<purchase_order_id>/item - Add item to purchase"""
     try:
-        data = request.get_json()
-
         query = """
             INSERT INTO purchase_order_item 
             (item_id, purchase_order_id, price, quantity)
@@ -210,13 +207,17 @@ def add_purchase_item(path: PurchaseOrderPath, body: PurchaseOrderItemCreateSche
         """
         params = (
             body.item_id,
-            body.purchase_order_id,
+            path.purchase_order_id,
             body.price,
             body.quantity
         )
 
-        execute_query(query, params, fetch=False)
+        result = execute_query(query, params, fetch=False)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+
         return jsonify(SuccessResponse(status="added").model_dump()), 200
+
     except Exception as e:
         app.logger.error(f"Error in add_purchase_item: {e}")
         return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
