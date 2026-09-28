@@ -1,4 +1,6 @@
 [x] Fix existing tests
+[ ] Add swagger UI
+[ ] Add DB versioning
 [ ] Make FrontEnd work
 [ ] Fix DB gaps
 [ ] Refactor the existing code
@@ -12,5 +14,7 @@
 [ ] Add k6
 [ ] Add ArgoCD
 [ ] Choose cloud k8s
+[ ] Add a tool to looks for security vulnerabilities
 [ ] Bump up dependency versions
 [ ] Improve test coverage
+[ ] Add contract tests

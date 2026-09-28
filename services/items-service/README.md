@@ -7,12 +7,7 @@ For database see [database README.md](../../database/README.md)
 ### Setup
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+uv sync
 
 # Set environment variables (optional)
 export DB_HOST=localhost
@@ -23,10 +18,16 @@ export DB_PASSWORD=root
 export FLASK_PORT=9020
 
 # Run application
-python app.py
+uv run flask run
 ```
 
 The service will start on `http://localhost:9020`
+
+## Update
+
+```shell
+uv add "<dependency>==<version>"
+```
 
 ## API Endpoints
 
