@@ -27,7 +27,7 @@ The service will start on `http://localhost:9020`
 
 ```shell
 uv add "<dependency>==<version>"
-uv remove "<dependency>==<version>"
+uv remove "<dependency>"
 
 # or update pyproject.toml and run:
 uv sync
