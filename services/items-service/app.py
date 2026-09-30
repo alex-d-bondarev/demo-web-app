@@ -1,12 +1,47 @@
-import pymysql
-import json
-import requests
-from flask import Flask, request, jsonify
-from config import Config
-from datetime import datetime
+from typing import Optional
 
-app = Flask(__name__)
+import pymysql
+import requests
+from flask import request, jsonify
+from flask_openapi3 import OpenAPI, Tag, Info
+from pydantic import BaseModel, Field
+
+from config import Config
+
+info = Info(title="Items Service API", version="0.1.0")
+app = OpenAPI(__name__)
 app.config.from_object(Config)
+item_tag = Tag(name="item", description="Item Operations")
+purchase_tag = Tag(name="Purchase", description="Purchase Order Operations")
+
+
+class ItemCreateSchema(BaseModel):
+    name: str = Field(..., description="Name of the item")
+    optimal_stock: int = Field(..., description="Restock is suggested if review_item.quantity is less than this value")
+    volume: float
+    weight: float
+
+
+class ItemPath(BaseModel):
+    item_id: int = Field(..., description="The ID of the item target")
+
+
+class PurchaseOrderItemCreateSchema(BaseModel):
+    item_id: int = Field(..., description="Reference to item.item_id")
+    price: float = Field(..., gt=0, description="Current price (must be greater than 0)")
+    quantity: int = Field(..., gt=0, description="Quantity (must be greater than 0)")
+
+
+class PurchaseOrderPath(BaseModel):
+    purchase_order_id: int = Field(..., description="ID of the purchase order from URL")
+
+class SuccessResponse(BaseModel):
+    status: str
+
+class ErrorResponse(BaseModel):
+    status: str = "error"
+    message: str
+
 
 def get_db_connection():
     """Get database connection"""
@@ -25,12 +60,13 @@ def get_db_connection():
         app.logger.error(f"Database connection error: {e}")
         return None
 
+
 def execute_query(query, params=None, fetch=True):
     """Execute database query"""
     connection = get_db_connection()
     if not connection:
         return None
-    
+
     try:
         with connection.cursor() as cursor:
             cursor.execute(query, params or ())
@@ -46,76 +82,85 @@ def execute_query(query, params=None, fetch=True):
     finally:
         connection.close()
 
+
 # ============= ITEM ENDPOINTS =============
 
-@app.route('/item', methods=['GET'])
+@app.get('/item', tags=[item_tag])
 def get_all_items():
     """GET /item - List all items"""
     try:
         query = "SELECT item_id, name FROM item"
-        items = execute_query(query, fetch=True)
-        if items is None:
-            items = []
-        return jsonify(items), 200
+        result = execute_query(query, fetch=True)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+        items = result
+        return jsonify(SuccessResponse(status="ok").model_dump()), 200
     except Exception as e:
         app.logger.error(f"Error in get_all_items: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
 
-@app.route('/item/<int:item_id>', methods=['GET'])
-def get_item(item_id):
+
+@app.get('/item/<int:item_id>', tags=[item_tag])
+def get_item(path: ItemPath):
     """GET /item/<item_id> - Get item details"""
     try:
         query = "SELECT * FROM item WHERE item_id = %s"
-        result = execute_query(query, (item_id,), fetch=True)
-        
+        result = execute_query(query, (path.item_id,), fetch=True)
+
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+
         if not result:
-            return jsonify({"status": "not_found"}), 200
-        
+            return jsonify(SuccessResponse(status="not_found").model_dump()), 200
+
         item = result[0]
-        return jsonify(item), 200
+        return jsonify(SuccessResponse(status="ok").model_dump()), 200
     except Exception as e:
         app.logger.error(f"Error in get_item: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
 
-@app.route('/item', methods=['POST'])
-def create_item():
+
+@app.post('/item', tags=[item_tag])
+def create_item(body: ItemCreateSchema):
     """POST /item - Create new item"""
     try:
-        data = request.get_json()
-        
         query = """
-            INSERT INTO item (item_id, name, optimal_stock, price, volume, weight)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO item (name, optimal_stock, volume, weight)
+            VALUES (%s, %s, %s, %s)
         """
         params = (
-            data.get('item_id'),
-            data.get('name'),
-            data.get('optimal_stock'),
-            data.get('price'),
-            data.get('volume'),
-            data.get('weight')
+            body.name,
+            body.optimal_stock,
+            body.volume,
+            body.weight
         )
-        
-        execute_query(query, params, fetch=False)
-        return jsonify({"status": "created"}), 200
+
+        result = execute_query(query, params, fetch=False)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+        return jsonify(SuccessResponse(status="created").model_dump()), 200
     except Exception as e:
         app.logger.error(f"Error in create_item: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
 
-@app.route('/item/<int:item_id>', methods=['DELETE'])
-def delete_item(item_id):
+
+@app.delete('/item/<int:item_id>', tags=[item_tag])
+def delete_item(path: ItemPath):
     """DELETE /item/<item_id> - Delete item"""
     try:
         query = "DELETE FROM item WHERE item_id = %s"
-        execute_query(query, (item_id,), fetch=False)
-        return jsonify({"status": "deleted"}), 200
+        result = execute_query(query, (path.item_id,), fetch=False)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+        return jsonify(SuccessResponse(status="deleted").model_dump()), 200
     except Exception as e:
         app.logger.error(f"Error in delete_item: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+
 
 # ============= PURCHASE ORDER ENDPOINTS =============
 
-@app.route('/purchase', methods=['GET'])
+@app.get('/purchase', tags=[purchase_tag])
 def get_all_purchases():
     """GET /purchase - List all purchases"""
     try:
@@ -128,12 +173,13 @@ def get_all_purchases():
         app.logger.error(f"Error in get_all_purchases: {e}")
         return jsonify({"status": "error", "message": str(e)}), 200
 
-@app.route('/purchase', methods=['POST'])
+
+@app.post('/purchase', tags=[purchase_tag])
 def create_purchase():
     """POST /purchase - Create new purchase"""
     try:
         data = request.get_json()
-        
+
         query = """
             INSERT INTO purchase_order (purchase_order_id, created_dt, delivered_dt, status, provider)
             VALUES (%s, %s, %s, %s, %s)
@@ -145,39 +191,44 @@ def create_purchase():
             data.get('status'),
             data.get('provider')
         )
-        
-        execute_query(query, params, fetch=False)
-        return jsonify({"status": "created"}), 200
+
+        result = execute_query(query, params, fetch=False)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+        return jsonify(SuccessResponse(status="created").model_dump()), 200
     except Exception as e:
         app.logger.error(f"Error in create_purchase: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
 
-@app.route('/purchase/<int:purchase_order_id>/item', methods=['POST'])
-def add_purchase_item(purchase_order_id):
+
+@app.post('/purchase/<int:purchase_order_id>/item', tags=[purchase_tag])
+def add_purchase_item(path: PurchaseOrderPath, body: PurchaseOrderItemCreateSchema):
     """POST /purchase/<purchase_order_id>/item - Add item to purchase"""
     try:
-        data = request.get_json()
-        
         query = """
             INSERT INTO purchase_order_item 
-            (purchase_order_item_id, item_id, purchase_order_id, price, quantity)
-            VALUES (%s, %s, %s, %s, %s)
+            (item_id, purchase_order_id, price, quantity)
+            VALUES (%s, %s, %s, %s)
         """
         params = (
-            data.get('purchase_order_item_id'),
-            data.get('item_id'),
-            data.get('purchase_order_id'),
-            data.get('price'),
-            data.get('quantity')
+            body.item_id,
+            path.purchase_order_id,
+            body.price,
+            body.quantity
         )
-        
-        execute_query(query, params, fetch=False)
-        return jsonify({"status": "added"}), 200
+
+        result = execute_query(query, params, fetch=False)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+
+        return jsonify(SuccessResponse(status="added").model_dump()), 200
+
     except Exception as e:
         app.logger.error(f"Error in add_purchase_item: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
 
-@app.route('/purchase/<int:purchase_order_id>/item/<int:purchase_order_item_id>', methods=['DELETE'])
+
+@app.delete('/purchase/<int:purchase_order_id>/item/<int:purchase_order_item_id>', tags=[purchase_tag])
 def delete_purchase_item(purchase_order_id, purchase_order_item_id):
     """DELETE /purchase/<purchase_order_id>/item/<purchase_order_item_id> - Delete purchase item"""
     try:
@@ -185,63 +236,70 @@ def delete_purchase_item(purchase_order_id, purchase_order_item_id):
             DELETE FROM purchase_order_item 
             WHERE purchase_order_id = %s AND purchase_order_item_id = %s
         """
-        execute_query(query, (purchase_order_id, purchase_order_item_id), fetch=False)
-        return jsonify({"status": "deleted"}), 200
+        result = execute_query(query, (purchase_order_id, purchase_order_item_id), fetch=False)
+        if result is None:
+            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+        return jsonify(SuccessResponse(status="deleted").model_dump()), 200
     except Exception as e:
         app.logger.error(f"Error in delete_purchase_item: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+
 
 # ============= WIREMOCK INTEGRATION ENDPOINT =============
 
-@app.route('/purchase-from-provider', methods=['POST'])
+@app.post('/purchase-from-provider', tags=[purchase_tag])
 def purchase_from_provider():
     """POST /purchase-from-provider - Call WireMock provider endpoint"""
     try:
         data = request.get_json()
         provider = data.get('provider')
         items = data.get('items', [])
-        
+
         if not provider:
-            return jsonify({"status": "error", "message": "provider is required"}), 200
-        
+            return jsonify(ErrorResponse(message="provider is required").model_dump()), 200
+
         # Call WireMock
         wiremock_url = f"{Config.WIREMOCK_URL}/provider/{provider}"
         response = requests.post(wiremock_url, json=items, timeout=5)
-        
-        return jsonify(response.json()), 200
+
+        return jsonify(SuccessResponse(status="ok").model_dump()), 200
     except requests.exceptions.RequestException as e:
         app.logger.error(f"WireMock request error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
     except Exception as e:
         app.logger.error(f"Error in purchase_from_provider: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+
 
 # ============= HEALTH CHECK =============
 
-@app.route('/health', methods=['GET'])
+@app.get('/health', tags=[])
 def health_check():
     """Health check endpoint"""
     try:
         connection = get_db_connection()
         if connection:
             connection.close()
-            return jsonify({"status": "ok"}), 200
+            return jsonify(SuccessResponse(status="ok").model_dump()), 200
         else:
-            return jsonify({"status": "error", "message": "Database connection failed"}), 200
+            return jsonify(ErrorResponse(message="Database connection failed").model_dump()), 200
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 200
+        return jsonify(ErrorResponse(message=str(e)).model_dump()), 200
+
 
 # ============= ERROR HANDLERS =============
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({"status": "error", "message": "Not found"}), 200
+    return jsonify(ErrorResponse(message="Not found").model_dump()), 200
+
 
 @app.errorhandler(500)
 def internal_error(error):
     app.logger.error(f"Internal error: {error}")
-    return jsonify({"status": "error", "message": "Internal server error"}), 200
+    return jsonify(ErrorResponse(message="Internal server error").model_dump()), 200
+
 
 if __name__ == '__main__':
     port = int(Config.FLASK_PORT) if hasattr(Config, 'FLASK_PORT') and Config.FLASK_PORT else 9020
-    app.run(host='0.0.0.0', port=port, debug=Config.DEBUG)
+    app.run(host='0.0.0.0', port=port, debug=True)

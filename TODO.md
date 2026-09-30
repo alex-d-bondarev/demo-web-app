@@ -1,5 +1,9 @@
 [x] Fix existing tests
+[x] Add swagger UI
 [ ] Make FrontEnd work
+    [ ] Make sure items-service can create items
+    [ ] Make sure reviews-service can create reviews
+[ ] Add DB versioning
 [ ] Fix DB gaps
 [ ] Refactor the existing code
 [ ] Install [Kiwi TCMS](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html#example-with-docker-compose)
@@ -12,5 +16,7 @@
 [ ] Add k6
 [ ] Add ArgoCD
 [ ] Choose cloud k8s
+[ ] Add a tool to looks for security vulnerabilities
 [ ] Bump up dependency versions
 [ ] Improve test coverage
+[ ] Add contract tests

@@ -1,12 +1,16 @@
-FROM python:3.11-slim
+# Use the official Astral uv image to pull the high-speed binary
+FROM ghcr.io/astral-sh/uv:latest AS uv_bin
+FROM python:3.14-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --from=uv_bin /uv /uvx /bin/
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --frozen --no-cache
 
 COPY . .
 
 EXPOSE 9020
 
-CMD ["python", "app.py"]
+CMD ["uv", "run", "flask", "run", "--host=0.0.0.0", "--port=9020"]

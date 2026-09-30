@@ -24,7 +24,7 @@ inventory items, purchase orders, and inventory reviews.
 
 #### Docker Compose
 
-```bash
+```shell
 docker compose build
 docker compose up -d
 docker compose logs -f
@@ -33,9 +33,19 @@ docker compose down
 docker compose restart <container>
 ```
 
+##### Rebuild
+
+```shell
+docker compose down
+cd services/reviews-service
+mvn clean package -DskipTests
+cd ../..
+docker compose up --build
+```
+
 #### Make
 
-```bash
+```shell
 make help
 ```
 
@@ -44,6 +54,8 @@ make help
 - **Frontend UI**: http://localhost:9010
 - **Items Service API**: http://localhost:9020
 - **Reviews Service API**: http://localhost:9030
+- **Reviews Service API (Swagger UI)**: http://localhost:9030/swagger-ui/index.html
+- **Reviews Service API (OpenAPI Json)**: http://localhost:9030/v3/api-docs
 - **Reviews Service API (Debug)**: http://localhost:9031
 - **WireMock Admin**: http://localhost:9040/__admin
 - **MySQL**: localhost:9050
@@ -89,7 +101,7 @@ The frontend includes a **Providers** page for testing WireMock provider endpoin
 
 ## Testing
 
-```bash
+```shell
 make test
 ```
 
