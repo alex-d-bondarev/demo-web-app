@@ -32,7 +32,7 @@ jobs:
           done
       
       - name: Run Items Service Tests
-        run: docker compose exec -T items-service python -m pytest test_items.py -v
+        run: docker compose exec -T items-service uv run python -m pytest test_items.py -vv
       
       - name: Run Reviews Service Tests
         run: docker compose exec -T reviews-service mvn -f /build/pom.xml test
