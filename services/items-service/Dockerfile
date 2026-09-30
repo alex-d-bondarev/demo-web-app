@@ -1,6 +1,6 @@
 # Use the official Astral uv image to pull the high-speed binary
 FROM ghcr.io/astral-sh/uv:latest AS uv_bin
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 

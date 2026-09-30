@@ -18,7 +18,7 @@ export DB_PASSWORD=root
 export FLASK_PORT=9020
 
 # Run application
-uv run flask run
+uv run flask run --host=0.0.0.0 --port=9020
 ```
 
 The service will start on `http://localhost:9020`

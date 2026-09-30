@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS item (
   item_id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255),
   optimal_stock INT,
-  price DECIMAL(10, 2),
   volume DECIMAL(10, 2),
   weight DECIMAL(10, 2)
 );

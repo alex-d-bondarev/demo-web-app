@@ -170,6 +170,23 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/86/6a/54cd42aaa14dff3e9f3206f0506e260d3294fc1c1c3b4be282344441f7bf/flask_openapi3-4.3.2-py3-none-any.whl", hash = "sha256:edf118061f4866b973df0810e75915d2f79403b1be9d333851ab5ebb44e85483", size = 46441, upload-time = "2026-05-09T03:18:58.065Z" },
 ]
 
+[package.optional-dependencies]
+swagger = [
+    { name = "flask-openapi3-swagger" },
+]
+
+[[package]]
+name = "flask-openapi3-swagger"
+version = "5.31.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flask-openapi3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/84/28/1cdf5e0f24d731a7f006b4d16bf1c9f4145222dbf8d504552804a2a21bcb/flask_openapi3_swagger-5.31.0.tar.gz", hash = "sha256:00211a418dd5cda57721deb215d64b09f70023c87208232076bc249a13aec0e6", size = 525955, upload-time = "2025-12-12T02:10:37.493Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cd/39/67a8c5e5a155400c676bee467fd253bb54af9e548fb1cfaa83ebd731f65a/flask_openapi3_swagger-5.31.0-py3-none-any.whl", hash = "sha256:748c57decbb56ae03301ef5731bbe1faddf8d37c7e8dc11d254b0c2c9026acdd", size = 529462, upload-time = "2025-12-12T02:10:36.007Z" },
+]
+
 [[package]]
 name = "idna"
 version = "3.20"
@@ -194,7 +211,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "flask" },
-    { name = "flask-openapi3" },
+    { name = "flask-openapi3", extra = ["swagger"] },
     { name = "pydantic" },
     { name = "pymysql" },
     { name = "pytest" },
@@ -205,7 +222,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "flask", specifier = "==3.0.0" },
-    { name = "flask-openapi3", specifier = "==4.3.2" },
+    { name = "flask-openapi3", extras = ["swagger"], specifier = "==4.3.2" },
     { name = "pydantic", specifier = "==2.13.5" },
     { name = "pymysql", specifier = "==1.1.0" },
     { name = "pytest", specifier = "==9.0.3" },

@@ -4,6 +4,7 @@ help:
 	@echo "ICU v1.0.0 - Available Commands"
 	@echo "================================"
 	@echo "make build        - Build all Docker images"
+	@echo "make rebuild      - Rebuild all Docker images"
 	@echo "make up           - Start all services with docker-compose"
 	@echo "make down         - Stop all services"
 	@echo "make logs         - View logs from all services"
@@ -18,6 +19,11 @@ help:
 
 build:
 	docker compose build
+
+rebuild:
+	docker compose down
+	docker compose down --rmi local
+	docker compose up --build -d
 
 up:
 	docker compose up -d
