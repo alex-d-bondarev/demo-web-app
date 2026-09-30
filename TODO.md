@@ -1,7 +1,9 @@
 [x] Fix existing tests
-[ ] Add swagger UI
-[ ] Add DB versioning
+[x] Add swagger UI
 [ ] Make FrontEnd work
+    [ ] Make sure items-service can create items
+    [ ] Make sure reviews-service can create reviews
+[ ] Add DB versioning
 [ ] Fix DB gaps
 [ ] Refactor the existing code
 [ ] Install [Kiwi TCMS](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html#example-with-docker-compose)
