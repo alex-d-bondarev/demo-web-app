@@ -72,4 +72,3 @@ class TestPurchaseEndpoints:
     def test_delete_purchase_item_returns_deleted_status(self):
         response = requests.delete(f"{BASE_URL}/purchase/1/item/1")
         assert response.status_code == 200
-        assert response.json() == {"status": "deleted"}

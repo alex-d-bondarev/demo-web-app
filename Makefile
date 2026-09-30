@@ -51,7 +51,7 @@ shell-mysql:
 
 test:
 	@echo "\n==== Start python test in items-service ====\n"
-	docker compose exec -T items-service python -m pytest test_items.py -v
+	docker compose exec -T items-service uv run python -m pytest test_items.py -vv
 	@echo "\n==== Finish python test in items-service ====\n"
 	@echo "\n==== Start java test in reviews-service ====\n"
 	docker compose exec -T reviews-service mvn -f /build/pom.xml test
