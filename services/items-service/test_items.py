@@ -26,7 +26,7 @@ class TestItemEndpoints:
         }
         response = requests.post(f"{BASE_URL}/item", json=payload)
         assert response.status_code == 200
-        assert response.json() == {"status": "created"}
+        assert response.json() == {"status": "Item created"}
     
     def test_get_item_by_id_returns_200(self):
         response = requests.get(f"{BASE_URL}/item/1")
@@ -68,7 +68,3 @@ class TestPurchaseEndpoints:
         response = requests.post(f"{BASE_URL}/purchase/1/item", json=payload)
         assert response.status_code == 200
         assert response.json() == {"status": "added"}
-    
-    def test_delete_purchase_item_returns_deleted_status(self):
-        response = requests.delete(f"{BASE_URL}/purchase/1/item/1")
-        assert response.status_code == 200

@@ -1,254 +1,119 @@
-from typing import Optional
+from typing import Tuple
 
-import pymysql
 import requests
-from flask import request, jsonify
+from flask import abort, request, jsonify, Response
 from flask_openapi3 import OpenAPI, Tag, Info
-from pydantic import BaseModel, Field
 
 from config import Config
+from data_objects.items import ItemPath, ItemCreateSchema
+from data_objects.purchase_orders import PurchaseOrderPath, PurchaseOrderItemCreateSchema
+from data_objects.responses import success_response, error_response
+from repositories.database import DatabaseConnection
+from repositories.items_repository import ItemsRepository
+from repositories.purchase_order_repository import PurchaseOrderRepository
 
 info = Info(title="Items Service API", version="0.1.0")
 app = OpenAPI(__name__)
 app.config.from_object(Config)
+
 item_tag = Tag(name="item", description="Item Operations")
 purchase_tag = Tag(name="Purchase", description="Purchase Order Operations")
 
-
-class ItemCreateSchema(BaseModel):
-    name: str = Field(..., description="Name of the item")
-    optimal_stock: int = Field(..., description="Restock is suggested if review_item.quantity is less than this value")
-    volume: float
-    weight: float
-
-
-class ItemPath(BaseModel):
-    item_id: int = Field(..., description="The ID of the item target")
-
-
-class PurchaseOrderItemCreateSchema(BaseModel):
-    item_id: int = Field(..., description="Reference to item.item_id")
-    price: float = Field(..., gt=0, description="Current price (must be greater than 0)")
-    quantity: int = Field(..., gt=0, description="Quantity (must be greater than 0)")
-
-
-class PurchaseOrderPath(BaseModel):
-    purchase_order_id: int = Field(..., description="ID of the purchase order from URL")
-
-class SuccessResponse(BaseModel):
-    status: str
-
-class ErrorResponse(BaseModel):
-    status: str = "error"
-    message: str
-
-
-def get_db_connection():
-    """Get database connection"""
-    try:
-        connection = pymysql.connect(
-            host=Config.DB_HOST,
-            port=Config.DB_PORT,
-            user=Config.DB_USER,
-            password=Config.DB_PASSWORD,
-            database=Config.DB_NAME,
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        return connection
-    except Exception as e:
-        app.logger.error(f"Database connection error: {e}")
-        return None
-
-
-def execute_query(query, params=None, fetch=True):
-    """Execute database query"""
-    connection = get_db_connection()
-    if not connection:
-        return None
-
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(query, params or ())
-            if fetch:
-                result = cursor.fetchall()
-            else:
-                connection.commit()
-                result = {"affected_rows": cursor.rowcount}
-        return result
-    except Exception as e:
-        app.logger.error(f"Query execution error: {e}")
-        return None
-    finally:
-        connection.close()
+database_connection = DatabaseConnection(app.logger)
+items_repository = ItemsRepository(app.logger, database_connection)
+purchase_order_repository = PurchaseOrderRepository(app.logger, database_connection)
 
 
 # ============= ITEM ENDPOINTS =============
 
 @app.get('/item', tags=[item_tag])
-def get_all_items():
-    """GET /item - List all items"""
-    try:
-        query = "SELECT item_id, name FROM item"
-        result = execute_query(query, fetch=True)
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
-        items = result
-        return jsonify(SuccessResponse(status="ok").model_dump()), 200
-    except Exception as e:
-        app.logger.error(f"Error in get_all_items: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+def get_all_items() -> Tuple[Response, int]:
+    result = items_repository.get_all()
+
+    if result is None:
+        abort(404, description="No items found in database")
+
+    return jsonify(result), 200
 
 
 @app.get('/item/<int:item_id>', tags=[item_tag])
-def get_item(path: ItemPath):
-    """GET /item/<item_id> - Get item details"""
-    try:
-        query = "SELECT * FROM item WHERE item_id = %s"
-        result = execute_query(query, (path.item_id,), fetch=True)
+def get_item(path: ItemPath) -> Tuple[Response, int]:
+    result = items_repository.by_id(path.item_id)
 
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+    if result is None:
+        abort(404, description="Item {} not found".format(path.item_id))
 
-        if not result:
-            return jsonify(SuccessResponse(status="not_found").model_dump()), 200
-
-        item = result[0]
-        return jsonify(SuccessResponse(status="ok").model_dump()), 200
-    except Exception as e:
-        app.logger.error(f"Error in get_item: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+    return success_response()
 
 
 @app.post('/item', tags=[item_tag])
-def create_item(body: ItemCreateSchema):
-    """POST /item - Create new item"""
-    try:
-        query = """
-            INSERT INTO item (name, optimal_stock, volume, weight)
-            VALUES (%s, %s, %s, %s)
-        """
-        params = (
-            body.name,
-            body.optimal_stock,
-            body.volume,
-            body.weight
-        )
+def create_item(body: ItemCreateSchema) -> Tuple[Response, int]:
+    result = items_repository.create(body)
 
-        result = execute_query(query, params, fetch=False)
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
-        return jsonify(SuccessResponse(status="created").model_dump()), 200
-    except Exception as e:
-        app.logger.error(f"Error in create_item: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+    if result is None:
+        return error_response("Database query failed")
+
+    return success_response("Item created")
 
 
 @app.delete('/item/<int:item_id>', tags=[item_tag])
-def delete_item(path: ItemPath):
-    """DELETE /item/<item_id> - Delete item"""
-    try:
-        query = "DELETE FROM item WHERE item_id = %s"
-        result = execute_query(query, (path.item_id,), fetch=False)
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
-        return jsonify(SuccessResponse(status="deleted").model_dump()), 200
-    except Exception as e:
-        app.logger.error(f"Error in delete_item: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+def delete_item(path: ItemPath) -> Tuple[Response, int]:
+    result = items_repository.delete(path.item_id)
+
+    if result is None:
+        return error_response("Database query failed")
+
+    return success_response("deleted")
 
 
 # ============= PURCHASE ORDER ENDPOINTS =============
 
 @app.get('/purchase', tags=[purchase_tag])
-def get_all_purchases():
-    """GET /purchase - List all purchases"""
-    try:
-        query = "SELECT * FROM purchase_order"
-        purchases = execute_query(query, fetch=True)
-        if purchases is None:
-            purchases = []
-        return jsonify(purchases), 200
-    except Exception as e:
-        app.logger.error(f"Error in get_all_purchases: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 200
+def get_all_purchases() -> Tuple[Response, int]:
+    result = purchase_order_repository.get_all()
+
+    if result is None:
+        abort(404, description="No purchase orders found in database")
+
+    return jsonify(result), 200
 
 
 @app.post('/purchase', tags=[purchase_tag])
-def create_purchase():
-    """POST /purchase - Create new purchase"""
-    try:
-        data = request.get_json()
+def create_purchase_order() -> Tuple[Response, int]:
+    result = purchase_order_repository.create(request.get_json())
 
-        query = """
-            INSERT INTO purchase_order (purchase_order_id, created_dt, delivered_dt, status, provider)
-            VALUES (%s, %s, %s, %s, %s)
-        """
-        params = (
-            data.get('purchase_order_id'),
-            data.get('created_dt'),
-            data.get('delivered_dt'),
-            data.get('status'),
-            data.get('provider')
-        )
+    if result is None:
+        return error_response("Database query failed")
 
-        result = execute_query(query, params, fetch=False)
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
-        return jsonify(SuccessResponse(status="created").model_dump()), 200
-    except Exception as e:
-        app.logger.error(f"Error in create_purchase: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+    return success_response("created")
 
 
 @app.post('/purchase/<int:purchase_order_id>/item', tags=[purchase_tag])
-def add_purchase_item(path: PurchaseOrderPath, body: PurchaseOrderItemCreateSchema):
-    """POST /purchase/<purchase_order_id>/item - Add item to purchase"""
-    try:
-        query = """
-            INSERT INTO purchase_order_item 
-            (item_id, purchase_order_id, price, quantity)
-            VALUES (%s, %s, %s, %s)
-        """
-        params = (
-            body.item_id,
-            path.purchase_order_id,
-            body.price,
-            body.quantity
-        )
+def add_purchase_order_item(path: PurchaseOrderPath, body: PurchaseOrderItemCreateSchema) -> Tuple[Response, int]:
+    result = purchase_order_repository.add_item(path.purchase_order_id, body)
 
-        result = execute_query(query, params, fetch=False)
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
+    if result is None:
+        return error_response("Database query failed")
 
-        return jsonify(SuccessResponse(status="added").model_dump()), 200
-
-    except Exception as e:
-        app.logger.error(f"Error in add_purchase_item: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+    return success_response("added")
 
 
 @app.delete('/purchase/<int:purchase_order_id>/item/<int:purchase_order_item_id>', tags=[purchase_tag])
-def delete_purchase_item(purchase_order_id, purchase_order_item_id):
-    """DELETE /purchase/<purchase_order_id>/item/<purchase_order_item_id> - Delete purchase item"""
-    try:
-        query = """
-            DELETE FROM purchase_order_item 
-            WHERE purchase_order_id = %s AND purchase_order_item_id = %s
-        """
-        result = execute_query(query, (purchase_order_id, purchase_order_item_id), fetch=False)
-        if result is None:
-            return jsonify(ErrorResponse(message="Database query failed").model_dump()), 500
-        return jsonify(SuccessResponse(status="deleted").model_dump()), 200
-    except Exception as e:
-        app.logger.error(f"Error in delete_purchase_item: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+def delete_purchase_order_item(purchase_order_id, purchase_order_item_id) -> Tuple[Response, int]:
+    result = purchase_order_repository.delete_item(purchase_order_id, purchase_order_item_id)
+
+    if result is None:
+        return error_response("Database query failed")
+
+    return success_response("deleted")
 
 
 # ============= WIREMOCK INTEGRATION ENDPOINT =============
+# Does nothing right now
+# TBD: see `Add wiremock logic` in TODO.md
 
 @app.post('/purchase-from-provider', tags=[purchase_tag])
-def purchase_from_provider():
+def purchase_from_provider() -> Tuple[Response, int]:
     """POST /purchase-from-provider - Call WireMock provider endpoint"""
     try:
         data = request.get_json()
@@ -256,49 +121,46 @@ def purchase_from_provider():
         items = data.get('items', [])
 
         if not provider:
-            return jsonify(ErrorResponse(message="provider is required").model_dump()), 200
+            return error_response("provider is required")
 
-        # Call WireMock
         wiremock_url = f"{Config.WIREMOCK_URL}/provider/{provider}"
         response = requests.post(wiremock_url, json=items, timeout=5)
 
-        return jsonify(SuccessResponse(status="ok").model_dump()), 200
+        return success_response()
     except requests.exceptions.RequestException as e:
         app.logger.error(f"WireMock request error: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+        return error_response("Look for 'WireMock request error' in logs")
     except Exception as e:
         app.logger.error(f"Error in purchase_from_provider: {e}")
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 500
+        abort(500, description="Look for 'Error in purchase_from_provider' in logs")
 
 
 # ============= HEALTH CHECK =============
 
 @app.get('/health', tags=[])
-def health_check():
-    """Health check endpoint"""
-    try:
-        connection = get_db_connection()
-        if connection:
-            connection.close()
-            return jsonify(SuccessResponse(status="ok").model_dump()), 200
-        else:
-            return jsonify(ErrorResponse(message="Database connection failed").model_dump()), 200
-    except Exception as e:
-        return jsonify(ErrorResponse(message=str(e)).model_dump()), 200
+def health_check() -> Tuple[Response, int]:
+    if database_connection.alive():
+        return success_response()
+
+    abort(500, description="Database connection failed")
 
 
 # ============= ERROR HANDLERS =============
 
 @app.errorhandler(404)
-def not_found(error):
-    return jsonify(ErrorResponse(message="Not found").model_dump()), 200
+def not_found(error) -> Tuple[Response, int]:
+    message = getattr(error, 'description', 'Not found')
+    return error_response(message, 404)
 
 
 @app.errorhandler(500)
-def internal_error(error):
+def internal_error(error) -> Tuple[Response, int]:
     app.logger.error(f"Internal error: {error}")
-    return jsonify(ErrorResponse(message="Internal server error").model_dump()), 200
+    message = getattr(error, 'description', 'Internal server error')
+    return error_response(message, 500)
 
+
+# ============= main =============
 
 if __name__ == '__main__':
     port = int(Config.FLASK_PORT) if hasattr(Config, 'FLASK_PORT') and Config.FLASK_PORT else 9020

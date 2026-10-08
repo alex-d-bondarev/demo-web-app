@@ -58,5 +58,5 @@ test:
 	@echo "\n==== Finish java test in reviews-service ====\n"
 
 clean:
-	docker compose down --rmi local
+	docker compose down -v
 	docker volume prune -f

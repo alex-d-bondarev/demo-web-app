@@ -40,3 +40,5 @@ CREATE TABLE IF NOT EXISTS review_item (
   item_id INT,
   quantity INT
 );
+
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root'; FLUSH PRIVILEGES;
