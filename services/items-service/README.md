@@ -33,30 +33,6 @@ uv remove "<dependency>"
 uv sync
 ```
 
-## API Endpoints
-
-### Items
-
-- `GET /item` - List all items
-- `GET /item/<item_id>` - Get item details
-- `POST /item` - Create item
-- `DELETE /item/<item_id>` - Delete item
-
-### Purchase Orders
-
-- `GET /purchase` - List all purchases
-- `POST /purchase` - Create purchase
-- `POST /purchase/<purchase_order_id>/item` - Add item to purchase
-- `DELETE /purchase/<purchase_order_id>/item/<purchase_order_item_id>` - Delete purchase item
-
-### WireMock Integration
-
-- `POST /purchase-from-provider` - Call WireMock provider endpoint
-
-### Health
-
-- `GET /health` - Health check
-
 ## Testing
 
 ### Run tests with pytest
@@ -64,10 +40,6 @@ uv sync
 ```bash
 # Using Docker
 docker-compose exec items-service python -m pytest test_items.py -v
-
-# Locally
-pip install pytest requests
-pytest test_items.py -v
 ```
 
 ## Docker
@@ -87,3 +59,25 @@ docker run -p 9020:9020 \
   -e FLASK_PORT=9020 \
   items-service
 ```
+
+## Debugging
+
+1. Start Mysql server from project root
+   ```shell
+   docker compose up --build mysql
+   ```
+2. In IDE:
+   ```
+   # Environment variables:
+   DB_HOST=localhost
+   DB_PORT=9055
+   DB_NAME=im_db
+   DB_USER=root
+   DB_PASSWORD=root
+   WIREMOCK_URL=http://localhost:9040
+   FLASK_ENV=development
+   FLASK_PORT=9020
+   
+   # Script parameters:
+   --host=0.0.0.0 --no-reload
+   ```

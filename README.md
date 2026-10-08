@@ -28,9 +28,10 @@ inventory items, purchase orders, and inventory reviews.
 docker compose build
 docker compose up -d
 docker compose logs -f
-docker compose logs -f <container>
+docker compose logs -f <service-name>
 docker compose down
-docker compose restart <container>
+docker compose restart <service-name>
+docker compose up --build <service-name>
 ```
 
 ##### Rebuild
