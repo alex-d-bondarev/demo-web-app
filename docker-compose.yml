@@ -65,6 +65,7 @@ services:
       DB_NAME: im_db
       DB_USER: root
       DB_PASSWORD: root
+      FRONT_END_URL: http://localhost:9010
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9031"
     ports:
       - "9030:9030"
