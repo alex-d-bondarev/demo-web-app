@@ -14,7 +14,6 @@
     <nav>
         <a href="index.html" class="nav-link">Home</a>
         <a href="items.html" class="nav-link">Items</a>
-        <a href="purchases.html" class="nav-link">Purchases</a>
         <a href="reviews.html" class="nav-link" style="background-color: #2c3e50;">Reviews</a>
         <a href="providers.html" class="nav-link">Providers</a>
     </nav>
@@ -25,31 +24,10 @@
         <div class="container">
             <h2>Reviews Management</h2>
             
-            <!-- Create Review Form -->
-            <form id="createReviewForm">
-                <h3>Create New Review</h3>
-                <div class="form-group">
-                    <label for="review_id">Review ID</label>
-                    <input type="number" id="review_id" name="review_id" required>
-                </div>
-                <div class="form-group">
-                    <label for="start_dt">Start Date/Time</label>
-                    <input type="datetime-local" id="start_dt" name="start_dt" required>
-                </div>
-                <div class="form-group">
-                    <label for="end_dt">End Date/Time</label>
-                    <input type="datetime-local" id="end_dt" name="end_dt" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <input type="text" id="status" name="status" placeholder="e.g., in-progress, completed" required>
-                </div>
-                <button type="submit" class="btn-primary">Create Review</button>
-            </form>
-            
+            <button class="btn-primary" onclick="window.location.href = '/create-review'">New Review</button>
+            <button class="btn-secondary" onclick="loadReviews()">Refresh Reviews</button>
+
             <!-- List Reviews -->
-            <h3 style="margin-top: 2rem;">Reviews List</h3>
-            <button class="btn-secondary" onclick="loadReviews()">Load Reviews</button>
             <div id="reviewsTable"></div>
         </div>
     </main>
@@ -58,37 +36,12 @@
     <script>
         const REVIEWS_URL = window.location.protocol + '//' + window.location.hostname + ':9030';
         
-        // Create review
-        document.getElementById('createReviewForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = {
-                review_id: parseInt(formData.get('review_id')),
-                start_dt: formData.get('start_dt').replace('T', ' ') + ':00',
-                end_dt: formData.get('end_dt').replace('T', ' ') + ':00',
-                status: formData.get('status')
-            };
-            
-            const result = await API.fetchAPI(`${REVIEWS_URL}/review`, {
-                method: 'POST',
-                body: JSON.stringify(data)
-            });
-            
-            if (result.success && result.data.status === 'created') {
-                API.showMessage('Review created successfully!', 'success');
-                e.target.reset();
-                loadReviews();
-            } else {
-                API.showMessage('Error creating review', 'error');
-            }
-        };
-        
         // Load reviews
         async function loadReviews() {
             const result = await API.fetchAPI(`${REVIEWS_URL}/review`);
             
             if (result.success && Array.isArray(result.data)) {
-                let html = '<table><thead><tr><th>Review ID</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Action</th></tr></thead><tbody>';
+                let html = '<table><thead><tr><th>Review ID</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Actions</th></tr></thead><tbody>';
                 result.data.forEach(review => {
                     html += `
                         <tr>
@@ -97,7 +50,8 @@
                             <td>${review.start_dt}</td>
                             <td>${review.end_dt}</td>
                             <td>
-                                <button class="btn-secondary" onclick="viewReview(${review.review_id})">Items</button>
+                                <button class="btn-primary" onclick="window.location.href = '/edit-review/${review.review_id}';">Edit</button>
+                                <button class="btn-secondary" onclick="viewReview(${review.review_id})">Items (TBD)</button>
                                 <button class="btn-danger" onclick="deleteReview(${review.review_id})">Delete</button>
                             </td>
                         </tr>
@@ -203,7 +157,7 @@
             
             if (result.success && result.data.status === 'deleted') {
                 API.showMessage('Item deleted from review', 'success');
-                viewReview(reviewId);
+                await viewReview(reviewId);
             } else {
                 API.showMessage('Error deleting item', 'error');
             }
@@ -219,7 +173,7 @@
             
             if (result.success && result.data.status === 'deleted') {
                 API.showMessage('Review deleted successfully', 'success');
-                loadReviews();
+                await loadReviews();
             } else {
                 API.showMessage('Error deleting review', 'error');
             }

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Review - ICU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Inventory Control Utility (ICU) v1.0.0</h1>
+    </header>
+    
+    <nav>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="items.html" class="nav-link">Items</a>
+        <a href="reviews.html" class="nav-link" style="background-color: #2c3e50;">Reviews</a>
+        <a href="providers.html" class="nav-link">Providers</a>
+    </nav>
+    
+    <main>
+        <div id="message" class="message"></div>
+        
+        <div id="successModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>Review created successfully!</h3>
+                <div class="modal-buttons">
+                    <button class="btn-primary" id="newReview">Create Another</button>
+                    <button class="btn-secondary" id="backToReviews">Back to reviews</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorModal" class="modal-overlay hidden error-frame">
+            <div class="modal-content">
+                <h3>Failed to create review</h3>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" id="okError">OK</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2>Create New Review</h2>
+            
+            <form id="createReviewForm">
+                <div class="form-group">
+                    <label for="start_dt">Start Date/Time</label>
+                    <input type="datetime-local" id="start_dt" name="start_dt" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_dt">End Date/Time</label>
+                    <input type="datetime-local" id="end_dt" name="end_dt" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" placeholder="e.g., in-progress, completed" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Review</button>
+            </form>
+        </div>
+    </main>
+    
+    <script src="app.js"></script>
+    <script>
+        const REVIEWS_URL = window.location.protocol + '//' + window.location.hostname + ':9030';
+        
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.remove('hidden');
+            trapFocus(document.getElementById('successModal'));
+        }
+        
+        function showErrorModal() {
+            document.getElementById('errorModal').classList.remove('hidden');
+            trapFocus(document.getElementById('errorModal'));
+        }
+        
+        function hideModals() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('errorModal').classList.add('hidden');
+            releaseFocusTrap();
+        }
+        
+        function trapFocus(modalElement) {
+            window._currentFocusTrap = modalElement;
+        }
+        
+        function releaseFocusTrap() {
+            window._currentFocusTrap = null;
+        }
+        
+        // Form submission
+        document.getElementById('createReviewForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                status: formData.get('status'),
+                start_dt: formData.get('start_dt') + ':00',
+                end_dt: formData.get('end_dt') + ':00',
+            };
+            
+            const result = await API.fetchAPI(`${REVIEWS_URL}/review`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            // Hide the form after successful submission
+            document.getElementById('createReviewForm').classList.add('hidden');
+
+            if (result.success && result.data.status === 'created') {
+                showSuccessModal();
+            } else {
+                // Show form again on error
+                document.getElementById('createReviewForm').classList.remove('hidden');
+                showErrorModal();
+            }
+        };
+        
+        // Success modal buttons
+        document.getElementById('backToReviews').onclick = () => {
+            window.location.href = '/reviews.html';
+        };
+        
+        document.getElementById('newReview').onclick = () => {
+            hideModals();
+            document.getElementById('createReviewForm').reset();
+            document.getElementById('createReviewForm').classList.remove('hidden');
+        };
+        
+        // Error modal button
+        document.getElementById('okError').onclick = () => {
+            hideModals();
+        };
+        
+        // Keyboard handlers
+        document.addEventListener('keydown', (e) => {
+            const successModal = document.getElementById('successModal');
+            const errorModal = document.getElementById('errorModal');
+            
+            if (!successModal.classList.contains('hidden') || !errorModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideModals();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!successModal.classList.contains('hidden')) {
+                        document.getElementById('newReview').click();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -22,6 +22,7 @@ export DB_PORT=9050
 export DB_NAME=im_db
 export DB_USER=root
 export DB_PASSWORD=root
+export FRONT_END_URL=http://localhost:9010
 
 # Run application
 java -jar target/reviews-service-1.0.0.jar
@@ -43,26 +44,9 @@ docker run -p 9030:9030 -p 9031:9031 \
   -e DB_NAME=im_db \
   -e DB_USER=root \
   -e DB_PASSWORD=root \
+  -e FRONT_END_URL=http://localhost:9010 \
   reviews-service
 ```
-
-## API Endpoints
-
-### Reviews
-
-- `GET /review` - List all reviews
-- `POST /review` - Create review
-- `DELETE /review/<review_id>` - Delete review
-
-### Review Items
-
-- `GET /review/<review_id>/item` - List review items for a review
-- `POST /review/<review_id>/item/<review_item_id>` - Add item to review
-- `DELETE /review/<review_id>/item/<review_item_id>` - Delete review item
-
-### Health
-
-- `GET /health` - Health check
 
 ## Testing
 
