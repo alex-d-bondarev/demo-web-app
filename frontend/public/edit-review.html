@@ -77,9 +77,9 @@
                     // Show header
                     document.getElementById('reviewHeader').innerHTML = `<h2>Editing Review #${reviewId}</h2>`;
                     
-                    // Pre-fill form
-                    document.getElementById('start_dt').value = result.data.start_dt;
-                    document.getElementById('end_dt').value = result.data.end_dt;
+                    // Pre-fill form (trim seconds from backend response)
+                    document.getElementById('start_dt').value = result.data.start_dt.replace(/:\d{2}$/, '');
+                    document.getElementById('end_dt').value = result.data.end_dt.replace(/:\d{2}$/, '');
                     document.getElementById('status').value = result.data.status;
                     
                     // Show form
