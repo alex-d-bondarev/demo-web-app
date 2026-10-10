@@ -125,8 +125,8 @@
             const formData = new FormData(e.target);
             const data = {
                 status: formData.get('status'),
-                start_dt: formData.get('start_dt').replace('T', ' ') + ':00',
-                end_dt: formData.get('end_dt').replace('T', ' ') + ':00',
+                start_dt: formData.get('start_dt') + ':00',
+                end_dt: formData.get('end_dt') + ':00',
             };
             
             try {
@@ -134,7 +134,10 @@
                     method: 'PUT',
                     body: JSON.stringify(data)
                 });
-                
+
+                // Hide the form after successful submission
+                document.getElementById('editReviewForm').classList.add('hidden');
+
                 if (result.success && result.data.status === 'updated') {
                     showSuccessModal();
                 } else {
