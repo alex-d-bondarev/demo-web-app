@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Review - ICU</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <h1>Inventory Control Utility (ICU) v1.0.0</h1>
+    </header>
+    
+    <nav>
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/items.html" class="nav-link">Items</a>
+        <a href="/reviews.html" class="nav-link" style="background-color: #2c3e50;">Reviews</a>
+        <a href="/providers.html" class="nav-link">Providers</a>
+    </nav>
+    
+    <main>
+        <div id="reviewHeader"></div>
+        
+        <div id="successModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>Review #<span id="successReviewId"></span> updated successfully</h3>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" id="backToReviews">Back to all reviews</button>
+                    <button class="btn-primary" id="continueEdit">Continue editing</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorModal" class="modal-overlay hidden error-frame">
+            <div class="modal-content">
+                <h3>Failed to save changes</h3>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" id="okError">OK</button>
+                </div>
+            </div>
+        </div>
+        
+        <form id="editReviewForm" class="hidden">
+            <div class="form-group">
+                <label for="start_dt">Start Date/Time</label>
+                <input type="datetime-local" id="start_dt" name="start_dt" required>
+            </div>
+            <div class="form-group">
+                <label for="end_dt">End Date/Time</label>
+                <input type="datetime-local" id="end_dt" name="end_dt" required>
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <input type="text" id="status" name="status" placeholder="e.g., in-progress, completed" required>
+            </div>
+            <button type="submit" class="btn-primary">Save Changes</button>
+        </form>
+    </main>
+    
+    <script src="/app.js"></script>
+    <script>
+        const REVIEWS_URL = window.location.protocol + '//' + window.location.hostname + ':9030';
+        
+        // Extract review ID from URL path
+        const pathParts = window.location.pathname.split('/');
+        const reviewId = pathParts[pathParts.length - 1];
+        
+        let originalData = null;
+        
+        async function loadReview() {
+            try {
+                const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}`);
+                
+                if (result.success && result.data) {
+                    originalData = result.data;
+                    
+                    // Show header
+                    document.getElementById('reviewHeader').innerHTML = `<h2>Editing Review #${reviewId}</h2>`;
+                    
+                    // Pre-fill form
+                    document.getElementById('start_dt').value = result.data.start_dt;
+                    document.getElementById('end_dt').value = result.data.end_dt;
+                    document.getElementById('status').value = result.data.status;
+                    
+                    // Show form
+                    document.getElementById('editReviewForm').classList.remove('hidden');
+                } else {
+                    // Review not found
+                    document.getElementById('reviewHeader').innerHTML = `<h2>404 Review #${reviewId} not found</h2>`;
+                }
+            } catch (err) {
+                console.error('Failed to load review:', err);
+                document.getElementById('reviewHeader').innerHTML = `<h2>404 Review #${reviewId} not found</h2>`;
+            }
+        }
+        
+        function showSuccessModal() {
+            document.getElementById('successReviewId').textContent = reviewId;
+            document.getElementById('successModal').classList.remove('hidden');
+            trapFocus(document.getElementById('successModal'));
+        }
+        
+        function showErrorModal() {
+            document.getElementById('errorModal').classList.remove('hidden');
+            trapFocus(document.getElementById('errorModal'));
+        }
+        
+        function hideModals() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('errorModal').classList.add('hidden');
+            releaseFocusTrap();
+        }
+        
+        function trapFocus(modalElement) {
+            window._currentFocusTrap = modalElement;
+        }
+        
+        function releaseFocusTrap() {
+            window._currentFocusTrap = null;
+        }
+        
+        // Form submission
+        document.getElementById('editReviewForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                status: formData.get('status'),
+                start_dt: formData.get('start_dt').replace('T', ' ') + ':00',
+                end_dt: formData.get('end_dt').replace('T', ' ') + ':00',
+            };
+            
+            try {
+                const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                
+                if (result.success && result.data.status === 'updated') {
+                    showSuccessModal();
+                } else {
+                    showErrorModal();
+                }
+            } catch (err) {
+                console.error('PUT failed:', err);
+                showErrorModal();
+            }
+        };
+        
+        // Success modal buttons
+        document.getElementById('backToReviews').onclick = () => {
+            window.location.href = '/reviews.html';
+        };
+        
+        document.getElementById('continueEdit').onclick = () => {
+            hideModals();
+            window.location.reload();
+        };
+        
+        // Error modal button
+        document.getElementById('okError').onclick = () => {
+            hideModals();
+        };
+        
+        // Keyboard handlers
+        document.addEventListener('keydown', (e) => {
+            const successModal = document.getElementById('successModal');
+            const errorModal = document.getElementById('errorModal');
+            
+            if (!successModal.classList.contains('hidden') || !errorModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    // ESC = Continue editing (stay on page)
+                    if (!successModal.classList.contains('hidden')) {
+                        document.getElementById('continueEdit').click();
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // ENTER = Back to all reviews
+                    if (!successModal.classList.contains('hidden')) {
+                        document.getElementById('backToReviews').click();
+                    }
+                }
+            }
+        });
+        
+        // Load review on page load
+        window.onload = loadReview;
+    </script>
+</body>
+</html>
