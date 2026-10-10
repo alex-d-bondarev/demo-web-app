@@ -86,7 +86,7 @@
             const result = await API.fetchAPI(`${REVIEWS_URL}/review`);
             
             if (result.success && Array.isArray(result.data)) {
-                let html = '<table><thead><tr><th>Review ID</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Action</th></tr></thead><tbody>';
+                let html = '<table><thead><tr><th>Review ID</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Actions</th></tr></thead><tbody>';
                 result.data.forEach(review => {
                     html += `
                         <tr>
@@ -95,7 +95,8 @@
                             <td>${review.start_dt}</td>
                             <td>${review.end_dt}</td>
                             <td>
-                                <button class="btn-secondary" onclick="viewReview(${review.review_id})">Items</button>
+                                <button class="btn-primary" onclick="window.location.href = '/edit-review/${review.review_id}';">Edit</button>
+                                <button class="btn-secondary" onclick="viewReview(${review.review_id})">Items (TBD)</button>
                                 <button class="btn-danger" onclick="deleteReview(${review.review_id})">Delete</button>
                             </td>
                         </tr>

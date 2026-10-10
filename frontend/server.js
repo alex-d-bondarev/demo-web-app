@@ -21,6 +21,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Serve edit-review.html for edit review page
+app.get('/edit-review/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'edit-review.html'));
+});
+
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Error:', err);
