@@ -1,6 +1,8 @@
 package com.icu.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 public class Review {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("review_id")
     private Integer reviewId;
     

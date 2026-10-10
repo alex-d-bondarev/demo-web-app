@@ -2,7 +2,7 @@
 [x] Add swagger UI
 [ ] Make FrontEnd work
     [x] Make sure items-service can create items
-    [ ] Make sure reviews-service can create reviews
+    [x] Make sure reviews-service can create reviews
     [ ] Make sure FrontEnd can use updated code
 [ ] Add DB versioning
 [ ] Fix DB gaps

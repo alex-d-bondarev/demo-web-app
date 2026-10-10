@@ -5,7 +5,6 @@ import com.icu.model.ReviewItem;
 import com.icu.repository.ReviewRepository;
 import com.icu.repository.ReviewItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +44,7 @@ public class ReviewController {
     @Transactional
     public ResponseEntity<?> createReview(@RequestBody Review review) {
         try {
+            review.setReviewId(null);
             reviewRepository.save(review);
             Map<String, String> response = new HashMap<>();
             response.put("status", "created");
