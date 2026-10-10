@@ -62,10 +62,9 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = {
-                review_id: parseInt(formData.get('review_id')),
+                status: formData.get('status'),
                 start_dt: formData.get('start_dt').replace('T', ' ') + ':00',
                 end_dt: formData.get('end_dt').replace('T', ' ') + ':00',
-                status: formData.get('status')
             };
             
             const result = await API.fetchAPI(`${REVIEWS_URL}/review`, {
