@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping
@@ -32,6 +33,22 @@ public class ReviewController {
     private ReviewItemRepository reviewItemRepository;
 
     // ============= REVIEW ENDPOINTS =============
+
+    /**
+     * GET /review/{review_id} - Get a single review by ID
+     */
+    @GetMapping("/review/{review_id}")
+    public ResponseEntity<?> getReviewById(@PathVariable Integer review_id) {
+        try {
+            Optional<Review> review = reviewRepository.findById(review_id);
+            if (review.isPresent()) {
+                return ResponseEntity.ok(review.get());
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
 
     /**
      * GET /review - List all reviews
