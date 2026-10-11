@@ -6,7 +6,7 @@ from flask_openapi3 import OpenAPI, Tag, Info
 from flask_cors import CORS
 
 from config import Config
-from data_objects.items import ItemPath, ItemCreateSchema
+from data_objects.items import ItemPath, ItemSchema
 from data_objects.purchase_orders import PurchaseOrderPath, PurchaseOrderItemCreateSchema
 from data_objects.responses import success_response, error_response
 from repositories.database import DatabaseConnection
@@ -46,17 +46,27 @@ def get_item(path: ItemPath) -> Tuple[Response, int]:
     if result is None:
         abort(404, description="Item {} not found".format(path.item_id))
 
-    return success_response()
+    return jsonify(result[0]), 200
 
 
 @app.post('/item', tags=[item_tag])
-def create_item(body: ItemCreateSchema) -> Tuple[Response, int]:
+def create_item(body: ItemSchema) -> Tuple[Response, int]:
     result = items_repository.create(body)
 
     if result is None:
         return error_response("Database query failed")
 
     return success_response("Item created")
+
+
+@app.put('/item/<int:item_id>', tags=[item_tag])
+def update_item(path: ItemPath, body: ItemSchema) -> Tuple[Response, int]:
+    result = items_repository.update(path.item_id, body)
+
+    if result is None:
+        abort(500, description="Database query failed")
+
+    return success_response("Item updated")
 
 
 @app.delete('/item/<int:item_id>', tags=[item_tag])

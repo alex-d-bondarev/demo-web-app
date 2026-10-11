@@ -1,7 +1,7 @@
 from pydantic import Field, BaseModel
 
 
-class ItemCreateSchema(BaseModel):
+class ItemSchema(BaseModel):
     name: str = Field(..., description="Name of the item")
     optimal_stock: int = Field(..., description="Restock is suggested if review_item.quantity is less than this value")
     volume: float

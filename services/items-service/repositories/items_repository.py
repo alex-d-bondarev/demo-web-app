@@ -2,7 +2,7 @@ from flask import abort
 from logging import Logger
 from typing import Optional
 
-from data_objects.items import ItemCreateSchema
+from data_objects.items import ItemSchema
 from repositories.database import DatabaseConnection
 
 
@@ -21,7 +21,7 @@ class ItemsRepository:
             self.app_logger.fatal(f"Error in get_item: {e}")
             abort(500, description="Look for 'Error in get_item' in logs")
 
-    def create(self, body: ItemCreateSchema):
+    def create(self, body: ItemSchema):
         try:
             query = """
                 INSERT INTO item (name, optimal_stock, volume, weight)
@@ -56,3 +56,24 @@ class ItemsRepository:
         except Exception as e:
             self.app_logger.fatal(f"Error in get_all_items: {e}")
             abort(500, description="Look for 'Error in get_all_items' in logs")
+
+    def update(self, item_id: int, body: 'ItemSchema'):
+        try:
+            query = """
+                UPDATE item
+                SET name = %s, optimal_stock = %s, volume = %s, weight = %s
+                WHERE item_id = %s
+            """
+            params = (
+                body.name,
+                body.optimal_stock,
+                body.volume,
+                body.weight,
+                item_id
+            )
+
+            return self.database_connection.execute_query(query, params, fetch=False)
+
+        except Exception as e:
+            self.app_logger.fatal(f"Error in update_item: {e}")
+            abort(500, description="Look for 'Error in update_item' in logs")
