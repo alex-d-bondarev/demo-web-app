@@ -1,7 +1,7 @@
 .PHONY: build up down logs logs-items logs-reviews logs-frontend logs-mysql clean test shell-mysql help
 
 help:
-	@echo "ICU v1.0.0 - Available Commands"
+	@echo "Inventory Management Demo app - Available Commands"
 	@echo "================================"
 	@echo "make build        - Build all Docker images"
 	@echo "make rebuild      - Rebuild all Docker images"

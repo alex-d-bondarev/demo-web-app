@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - icu-network
+      - im-network
 
   # WireMock Mock Server
   wiremock:
@@ -28,7 +28,7 @@ services:
     ports:
       - "9040:9040"
     networks:
-      - icu-network
+      - im-network
 
    # Items Service (Python/Flask)
   items-service:
@@ -52,7 +52,7 @@ services:
     volumes:
       - ./services/items-service:/app
     networks:
-      - icu-network
+      - im-network
 
   # Reviews Service (Java/Spring Boot)
   reviews-service:
@@ -65,6 +65,7 @@ services:
       DB_NAME: im_db
       DB_USER: root
       DB_PASSWORD: root
+      FRONT_END_URL: http://localhost:9010
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9031"
     ports:
       - "9030:9030"
@@ -73,7 +74,7 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - icu-network
+      - im-network
 
   # Frontend Service (Node.js)
   frontend:
@@ -93,12 +94,12 @@ services:
       - ./frontend:/app
       - /app/node_modules
     networks:
-      - icu-network
+      - im-network
 
 volumes:
   im_db_data:
     driver: local
 
 networks:
-  icu-network:
+  im-network:
     driver: bridge

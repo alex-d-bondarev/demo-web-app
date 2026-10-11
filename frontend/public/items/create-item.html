@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Item - IM</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    
+    <main>
+        <div id="message" class="message"></div>
+        
+        <div id="successModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h3>Item created successfully!</h3>
+                <div class="modal-buttons">
+                    <button class="btn-primary" id="newItem">Create Another</button>
+                    <button class="btn-secondary" id="backToItems">Back to items</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorModal" class="modal-overlay hidden error-frame">
+            <div class="modal-content">
+                <h3>Failed to create item</h3>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" id="okError">OK</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2>Create New Item</h2>
+            
+            <form id="createItemForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="optimal_stock">Optimal Stock</label>
+                    <input type="number" id="optimal_stock" name="optimal_stock" required>
+                </div>
+                <div class="form-group">
+                    <label for="volume">Volume</label>
+                    <input type="number" id="volume" name="volume" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight</label>
+                    <input type="number" id="weight" name="weight" step="0.01" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Item</button>
+            </form>
+        </div>
+    </main>
+    
+    <script src="/app.js"></script>
+    <script>
+        const ITEMS_URL = window.location.protocol + '//' + window.location.hostname + ':9020';
+        
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.remove('hidden');
+            trapFocus(document.getElementById('successModal'));
+        }
+        
+        function showErrorModal() {
+            document.getElementById('errorModal').classList.remove('hidden');
+            trapFocus(document.getElementById('errorModal'));
+        }
+        
+        function hideModals() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('errorModal').classList.add('hidden');
+            releaseFocusTrap();
+        }
+        
+        function trapFocus(modalElement) {
+            window._currentFocusTrap = modalElement;
+        }
+        
+        function releaseFocusTrap() {
+            window._currentFocusTrap = null;
+        }
+        
+        // Form submission
+        document.getElementById('createItemForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name'),
+                optimal_stock: parseInt(formData.get('optimal_stock')),
+                volume: parseFloat(formData.get('volume')),
+                weight: parseFloat(formData.get('weight'))
+            };
+            
+            const result = await API.fetchAPI(`${ITEMS_URL}/item`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            // Hide the form after successful submission
+            document.getElementById('createItemForm').classList.add('hidden');
+
+            if (result.success && result.data && (result.data.status === 'created' || result.data.status === 'Item created')) {
+                showSuccessModal();
+            } else {
+                // Show form again on error
+                document.getElementById('createItemForm').classList.remove('hidden');
+                showErrorModal();
+            }
+        };
+        
+        // Success modal buttons
+        document.getElementById('backToItems').onclick = () => {
+            window.location.href = '/items/index.html';
+        };
+        
+        document.getElementById('newItem').onclick = () => {
+            hideModals();
+            document.getElementById('createItemForm').reset();
+            document.getElementById('createItemForm').classList.remove('hidden');
+        };
+        
+        // Error modal button
+        document.getElementById('okError').onclick = () => {
+            hideModals();
+            window.location.reload();
+        };
+        
+        // Keyboard handlers
+        document.addEventListener('keydown', (e) => {
+            const successModal = document.getElementById('successModal');
+            const errorModal = document.getElementById('errorModal');
+            
+            if (!successModal.classList.contains('hidden') || !errorModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideModals();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!successModal.classList.contains('hidden')) {
+                        document.getElementById('newItem').click();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,16 +1,23 @@
 {
-  "name": "icu-frontend",
+  "name": "im-frontend",
   "version": "1.0.0",
-  "description": "ICU Frontend Service",
+  "description": "IM Frontend Service",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["icu", "inventory", "frontend"],
+  "keywords": [
+    "im",
+    "inventory",
+    "management",
+    "frontend"
+  ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2"
+    "axios": "1.20.0",
+    "bootstrap": "5.3.8",
+    "express": "4.22.3"
   }
 }

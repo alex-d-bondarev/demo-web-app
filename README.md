@@ -1,7 +1,7 @@
 # Demo Web App
 
-A demo web app that behaves like a very simple app for managing 
-inventory items, purchase orders, and inventory reviews.
+Inventory Management (IM) Demo app that behaves like a very simple app for managing 
+inventory items, purchase orders, and inventory reviews/audit.
 
 ## Technology Stack
 
@@ -54,39 +54,13 @@ make help
 
 - **Frontend UI**: http://localhost:9010
 - **Items Service API**: http://localhost:9020
+- **Items Service API (Swagger UI)**: http://localhost:9020/openapi/
 - **Reviews Service API**: http://localhost:9030
 - **Reviews Service API (Swagger UI)**: http://localhost:9030/swagger-ui/index.html
 - **Reviews Service API (OpenAPI Json)**: http://localhost:9030/v3/api-docs
 - **Reviews Service API (Debug)**: http://localhost:9031
 - **WireMock Admin**: http://localhost:9040/__admin
 - **MySQL**: localhost:9050
-
-## API Endpoints
-
-### Items Service (Python/Flask)
-
-- `GET /item` - List all items
-- `GET /item/<item_id>` - Get item details
-- `POST /item` - Create item
-- `DELETE /item/<item_id>` - Delete item
-- `GET /purchase` - List all purchases
-- `POST /purchase` - Create purchase
-- `POST /purchase/<purchase_order_id>/item` - Add item to purchase
-- `DELETE /purchase/<purchase_order_id>/item/<purchase_order_item_id>` - Delete purchase item
-- `POST /purchase-from-provider` - Call WireMock provider (test endpoint)
-- `GET /health` - Health check
-
-### Reviews Service (Java/Spring Boot)
-
-- `GET /review` - List all reviews
-- `POST /review` - Create review
-- `DELETE /review/<review_id>` - Delete review
-- `GET /review/<review_id>/item` - List review items
-- `POST /review/<review_id>/item/<review_item_id>` - Add item to review
-- `DELETE /review/<review_id>/item/<review_item_id>` - Delete review item
-- `GET /health` - Health check
-
-All endpoints return HTTP 200 status code per v1.0.0 requirements.
 
 ### WireMock Provider Endpoints (Port 9040)
 

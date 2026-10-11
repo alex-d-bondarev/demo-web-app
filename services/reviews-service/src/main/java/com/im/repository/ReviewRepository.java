@@ -1,6 +1,6 @@
-package com.icu.repository;
+package com.im.repository;
 
-import com.icu.model.Review;
+import com.im.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
