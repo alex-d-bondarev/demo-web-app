@@ -44,3 +44,6 @@ target/
 
 # Misc
 *.log
+
+# LLMs
+.ori/

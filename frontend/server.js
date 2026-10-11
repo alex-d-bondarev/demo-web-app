@@ -46,15 +46,19 @@ app.get('/reviews/edit/:id', (req, res) => {
 
 // Items routes - serve from items folder
 app.get('/items', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'items', 'items.html'));
+    res.sendFile(path.join(__dirname, 'public', 'items', 'index.html'));
 });
 
 app.get('/items/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'items', 'items.html'));
+    res.sendFile(path.join(__dirname, 'public', 'items', 'index.html'));
 });
 
-app.get('/items/items.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'items', 'items.html'));
+app.get('/items/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'items', 'index.html'));
+});
+
+app.get('/items/create', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'items', 'create-item.html'));
 });
 
 // Error handler

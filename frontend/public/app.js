@@ -138,7 +138,7 @@ function renderHeaderNav(currentPage) {
         </header>
         <nav>
             <a href="/index.html" class="nav-link ${currentPage === 'home' ? 'active' : ''}">Home</a>
-            <a href="/items/items.html" class="nav-link ${currentPage === 'items' ? 'active' : ''}">Items</a>
+            <a href="/items/index.html" class="nav-link ${currentPage === 'items' ? 'active' : ''}">Items</a>
             <a href="/reviews/" class="nav-link ${currentPage === 'reviews' ? 'active' : ''}">Reviews</a>
             <a href="/providers.html" class="nav-link ${currentPage === 'providers' ? 'active' : ''}">Providers</a>
         </nav>
