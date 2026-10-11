@@ -61,6 +61,11 @@ app.get('/items/create', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'items', 'create-item.html'));
 });
 
+// Serve edit-item.html for edit item page
+app.get('/items/edit/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'items', 'edit-item.html'));
+});
+
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Error:', err);

@@ -36,7 +36,7 @@
                             <td>${item.item_id}</td>
                             <td>${item.name}</td>
                             <td>
-                                <button class="btn-secondary" onclick="viewItem(${item.item_id})">View</button>
+                                <button class="btn-primary" onclick="window.location.href = '/items/edit/${item.item_id}'">Edit</button>
                                 <button class="btn-danger" onclick="deleteItem(${item.item_id})">Delete</button>
                             </td>
                         </tr>

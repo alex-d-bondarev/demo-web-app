@@ -35,20 +35,12 @@
             
             <form id="createItemForm">
                 <div class="form-group">
-                    <label for="item_id">Item ID</label>
-                    <input type="number" id="item_id" name="item_id" required>
-                </div>
-                <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required>
                 </div>
                 <div class="form-group">
                     <label for="optimal_stock">Optimal Stock</label>
                     <input type="number" id="optimal_stock" name="optimal_stock" required>
-                </div>
-                <div class="form-group">
-                    <label for="price">Price</label>
-                    <input type="number" id="price" name="price" step="0.01" required>
                 </div>
                 <div class="form-group">
                     <label for="volume">Volume</label>
@@ -96,10 +88,8 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = {
-                item_id: parseInt(formData.get('item_id')),
                 name: formData.get('name'),
                 optimal_stock: parseInt(formData.get('optimal_stock')),
-                price: parseFloat(formData.get('price')),
                 volume: parseFloat(formData.get('volume')),
                 weight: parseFloat(formData.get('weight'))
             };
@@ -112,7 +102,7 @@
             // Hide the form after successful submission
             document.getElementById('createItemForm').classList.add('hidden');
 
-            if (result.success && result.data.status === 'created') {
+            if (result.success && result.data && (result.data.status === 'created' || result.data.status === 'Item created')) {
                 showSuccessModal();
             } else {
                 // Show form again on error
@@ -135,6 +125,7 @@
         // Error modal button
         document.getElementById('okError').onclick = () => {
             hideModals();
+            window.location.reload();
         };
         
         // Keyboard handlers
