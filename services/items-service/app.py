@@ -3,6 +3,7 @@ from typing import Tuple
 import requests
 from flask import abort, request, jsonify, Response
 from flask_openapi3 import OpenAPI, Tag, Info
+from flask_cors import CORS
 
 from config import Config
 from data_objects.items import ItemPath, ItemCreateSchema
@@ -15,6 +16,8 @@ from repositories.purchase_order_repository import PurchaseOrderRepository
 info = Info(title="Items Service API", version="0.1.0")
 app = OpenAPI(__name__)
 app.config.from_object(Config)
+
+CORS(app, resources={r"/*": {"origins": "http://localhost:9010"}}, supports_credentials=True)
 
 item_tag = Tag(name="item", description="Item Operations")
 purchase_tag = Tag(name="Purchase", description="Purchase Order Operations")

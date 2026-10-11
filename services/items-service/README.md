@@ -31,6 +31,7 @@ uv remove "<dependency>"
 
 # or update pyproject.toml and run:
 uv sync
+uv lock
 ```
 
 ## Testing
