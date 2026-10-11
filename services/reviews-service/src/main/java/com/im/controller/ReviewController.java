@@ -1,9 +1,9 @@
-package com.icu.controller;
+package com.im.controller;
 
-import com.icu.model.Review;
-import com.icu.model.ReviewItem;
-import com.icu.repository.ReviewRepository;
-import com.icu.repository.ReviewItemRepository;
+import com.im.model.Review;
+import com.im.model.ReviewItem;
+import com.im.repository.ReviewRepository;
+import com.im.repository.ReviewItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;

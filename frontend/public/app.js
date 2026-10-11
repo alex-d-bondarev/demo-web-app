@@ -129,6 +129,36 @@ function formatDatetimeLocal(value) {
 }
 
 /**
+ * Render header and navigation for current page
+ */
+function renderHeaderNav(currentPage) {
+    const navHtml = `
+        <header>
+            <h1>Inventory Management (IM) Demo app </h1>
+        </header>
+        <nav>
+            <a href="/index.html" class="nav-link ${currentPage === 'home' ? 'active' : ''}">Home</a>
+            <a href="/items/items.html" class="nav-link ${currentPage === 'items' ? 'active' : ''}">Items</a>
+            <a href="/reviews/" class="nav-link ${currentPage === 'reviews' ? 'active' : ''}">Reviews</a>
+            <a href="/providers.html" class="nav-link ${currentPage === 'providers' ? 'active' : ''}">Providers</a>
+        </nav>
+    `;
+    document.body.insertAdjacentHTML('afterbegin', navHtml);
+}
+
+/**
+ * Determine current page based on URL
+ */
+function getCurrentPage() {
+    const path = window.location.pathname;
+    if (path === '/' || path === '/index.html') return 'home';
+    if (path.includes('items')) return 'items';
+    if (path.includes('reviews')) return 'reviews';
+    if (path.includes('providers')) return 'providers';
+    return 'home';
+}
+
+/**
  * Get available providers information
  */
 function getAvailableProviders() {
@@ -250,5 +280,12 @@ window.API = {
     getWiremockUrl,
     getAvailableProviders,
     testProvider,
-    getPredefinedTestItems
+    getPredefinedTestItems,
+    renderHeaderNav,
+    getCurrentPage
 };
+
+// Initialize header/nav on page load
+window.addEventListener('DOMContentLoaded', () => {
+    renderHeaderNav(getCurrentPage());
+});

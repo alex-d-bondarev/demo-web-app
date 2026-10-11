@@ -1,6 +1,6 @@
-package com.icu.repository;
+package com.im.repository;
 
-import com.icu.model.ReviewItem;
+import com.im.model.ReviewItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

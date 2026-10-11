@@ -1,15 +1,16 @@
 {
-  "name": "icu-frontend",
+  "name": "im-frontend",
   "version": "1.0.0",
-  "description": "ICU Frontend Service",
+  "description": "IM Frontend Service",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
   "keywords": [
-    "icu",
+    "im",
     "inventory",
+    "management",
     "frontend"
   ],
   "author": "",

@@ -1,7 +1,7 @@
 # Demo Web App
 
-A demo web app that behaves like a very simple app for managing 
-inventory items, purchase orders, and inventory reviews.
+Inventory Management (IM) Demo app that behaves like a very simple app for managing 
+inventory items, purchase orders, and inventory reviews/audit.
 
 ## Technology Stack
 

@@ -12,12 +12,12 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.icu</groupId>
+    <groupId>com.im</groupId>
     <artifactId>reviews-service</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>Reviews Service</name>
-    <description>ICU Reviews Service</description>
+    <description>IM Reviews Service</description>
 
     <properties>
         <java.version>17</java.version>

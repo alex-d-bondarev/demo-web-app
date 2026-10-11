@@ -1,7 +1,7 @@
-package com.icu;
+package com.im;
 
-import com.icu.repository.ReviewRepository;
-import com.icu.repository.ReviewItemRepository;
+import com.im.repository.ReviewRepository;
+import com.im.repository.ReviewItemRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
