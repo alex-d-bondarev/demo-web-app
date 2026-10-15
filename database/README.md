@@ -1,8 +1,30 @@
 # Database Layer
 
-## Schema Details
+## Atlas hints
 
-See [init.sql](./init.sql)
+```shell
+cd database
+export DB_URL="mysql://root:root@localhost:9050/im_db"
+export DEV_DB="docker://mysql/8/dev"
+
+# Test connection to local docker compose
+atlas schema inspect --url ${DB_URL} --format "OK"
+
+# Dry run the change
+atlas schema apply \
+  --url "$DB_URL" \
+  --to file://schema/ \
+  --dev-url "docker://mysql/8/dev" \
+  --dry-run
+# OR
+atlas schema apply --env local --dry-run
+
+# Apply changes
+atlas schema apply --env local
+
+# Clean up
+atlas tool docker kill --name my-db
+```
 
 ## Manual Database Operations
 

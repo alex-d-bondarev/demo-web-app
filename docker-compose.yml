@@ -3,19 +3,41 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_DATABASE: im_db
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME:-im_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_ALLOW_EMPTY_PASSWORD: 'no'
     volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - im_db_data:/var/lib/mysql
     ports:
-      - "9050:3306"
+      - "${DB_EXTERNAL_PORT:-9050}:${DB_NETWORK_PORT:-3306}"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      im-network:
+        aliases:
+          - ${DB_HOST:-mysql}
+  
+  # Atlas database migration runner
+  atlas:
+    image: arigaio/atlas:latest
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      DB_URL: "mysql://${DB_USER:-root}:${DB_PASSWORD:-root}@mysql:${DB_NETWORK_PORT:-3306}/${DB_NAME:-im_db}"
+    volumes:
+      - ./database:/work
+    working_dir: /work
+    command:
+      - schema
+      - apply
+      - --env
+      - local
+      - --auto-approve
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - im-network
 
@@ -26,28 +48,44 @@ services:
       - ./wiremock/mappings:/home/wiremock/mappings
       - ./wiremock/__files:/home/wiremock/__files
     ports:
-      - "9040:9040"
+      - "${WIREMOCK_PORT:-9040}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/__admin/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     networks:
       - im-network
 
-   # Items Service (Python/Flask)
+# Items Service (Python/Flask)
   items-service:
     build:
       context: ./services/items-service
       dockerfile: Dockerfile
     environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: im_db
-      DB_USER: root
-      DB_PASSWORD: root
-      WIREMOCK_URL: http://wiremock:9040
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_NETWORK_PORT:-3306}
+      DB_NAME: ${DB_NAME:-im_db}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      WIREMOCK_URL: http://wiremock:8080
       FLASK_ENV: development
-      FLASK_PORT: 9020
+      FLASK_PORT: ${ITEMS_PORT:-9020}
     ports:
-      - "9020:9020"
+      - "${ITEMS_PORT:-9020}:${ITEMS_PORT:-9020}"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:${ITEMS_PORT:-9020}/health\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       mysql:
+        condition: service_healthy
+      atlas:
+        condition: service_completed_successfully
+      wiremock:
         condition: service_healthy
     volumes:
       - ./services/items-service:/app
@@ -60,19 +98,27 @@ services:
       context: ./services/reviews-service
       dockerfile: Dockerfile
     environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: im_db
-      DB_USER: root
-      DB_PASSWORD: root
-      FRONT_END_URL: http://localhost:9010
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9031"
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_NETWORK_PORT:-3306}
+      DB_NAME: ${DB_NAME:-im_db}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      FRONT_END_URL: http://localhost:${FRONTEND_PORT:-9010}
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${REVIEWS_DEBUG_PORT:-9031}"
     ports:
-      - "9030:9030"
-      - "9031:9031"
+      - "${REVIEWS_PORT:-9030}:${REVIEWS_PORT:-9030}"
+      - "${REVIEWS_DEBUG_PORT:-9031}:${REVIEWS_DEBUG_PORT:-9031}"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${REVIEWS_PORT:-9030}/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     depends_on:
       mysql:
         condition: service_healthy
+      atlas:
+        condition: service_completed_successfully
     networks:
       - im-network
 
@@ -82,14 +128,16 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      ITEMS_SERVICE_URL: http://items-service:9020
-      REVIEWS_SERVICE_URL: http://reviews-service:9030
+      ITEMS_SERVICE_URL: http://items-service:${ITEMS_PORT:-9020}
+      REVIEWS_SERVICE_URL: http://reviews-service:${REVIEWS_PORT:-9030}
       NODE_ENV: development
     ports:
-      - "9010:9010"
+      - "${FRONTEND_PORT:-9010}:${FRONTEND_PORT:-9010}"
     depends_on:
-      - items-service
-      - reviews-service
+      items-service:
+        condition: service_healthy
+      reviews-service:
+        condition: service_healthy
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -102,4 +150,5 @@ volumes:
 
 networks:
   im-network:
+    name: ${NETWORK_NAME:-im-network}
     driver: bridge
