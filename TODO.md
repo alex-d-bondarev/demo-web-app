@@ -4,7 +4,7 @@
     [x] Make sure items-service can create items
     [x] Make sure reviews-service can create reviews
     [x] Make sure FrontEnd can use updated code
-[ ] Add DB versioning
+[x] Add DB versioning
 [ ] Fix DB gaps
 [ ] Install [Kiwi TCMS](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html#example-with-docker-compose)
 [ ] Write down tests in Kiwi
