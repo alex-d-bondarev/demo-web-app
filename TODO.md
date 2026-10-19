@@ -7,7 +7,7 @@
 [x] Add DB versioning
 [ ] Cleanup
     [ ] Remove review_item till it is used again
-    [ ] Remove purchase_order till it is used again
+    [x] Remove purchase_order till it is used again
     [x] Remove purchase_order_item till it is used again
     [ ] Check for other unused
 [ ] Try to deploy to other laptop with basic k8s
