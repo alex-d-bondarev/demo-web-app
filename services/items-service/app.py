@@ -7,11 +7,9 @@ from flask_cors import CORS
 
 from config import Config
 from data_objects.items import ItemPath, ItemSchema
-from data_objects.purchase_orders import PurchaseOrderPath, PurchaseOrderItemCreateSchema
 from data_objects.responses import success_response, error_response
 from repositories.database import DatabaseConnection
 from repositories.items_repository import ItemsRepository
-from repositories.purchase_order_repository import PurchaseOrderRepository
 
 info = Info(title="Items Service API", version="0.1.0")
 app = OpenAPI(__name__)
@@ -24,7 +22,6 @@ purchase_tag = Tag(name="Purchase", description="Purchase Order Operations")
 
 database_connection = DatabaseConnection(app.logger)
 items_repository = ItemsRepository(app.logger, database_connection)
-purchase_order_repository = PurchaseOrderRepository(app.logger, database_connection)
 
 
 # ============= ITEM ENDPOINTS =============
@@ -77,75 +74,6 @@ def delete_item(path: ItemPath) -> Tuple[Response, int]:
         return error_response("Database query failed")
 
     return success_response("deleted")
-
-
-# ============= PURCHASE ORDER ENDPOINTS =============
-
-@app.get('/purchase', tags=[purchase_tag])
-def get_all_purchases() -> Tuple[Response, int]:
-    result = purchase_order_repository.get_all()
-
-    if result is None:
-        abort(404, description="No purchase orders found in database")
-
-    return jsonify(result), 200
-
-
-@app.post('/purchase', tags=[purchase_tag])
-def create_purchase_order() -> Tuple[Response, int]:
-    result = purchase_order_repository.create(request.get_json())
-
-    if result is None:
-        return error_response("Database query failed")
-
-    return success_response("created")
-
-
-@app.post('/purchase/<int:purchase_order_id>/item', tags=[purchase_tag])
-def add_purchase_order_item(path: PurchaseOrderPath, body: PurchaseOrderItemCreateSchema) -> Tuple[Response, int]:
-    result = purchase_order_repository.add_item(path.purchase_order_id, body)
-
-    if result is None:
-        return error_response("Database query failed")
-
-    return success_response("added")
-
-
-@app.delete('/purchase/<int:purchase_order_id>/item/<int:purchase_order_item_id>', tags=[purchase_tag])
-def delete_purchase_order_item(purchase_order_id, purchase_order_item_id) -> Tuple[Response, int]:
-    result = purchase_order_repository.delete_item(purchase_order_id, purchase_order_item_id)
-
-    if result is None:
-        return error_response("Database query failed")
-
-    return success_response("deleted")
-
-
-# ============= WIREMOCK INTEGRATION ENDPOINT =============
-# Does nothing right now
-# TBD: see `Add wiremock logic` in TODO.md
-
-@app.post('/purchase-from-provider', tags=[purchase_tag])
-def purchase_from_provider() -> Tuple[Response, int]:
-    """POST /purchase-from-provider - Call WireMock provider endpoint"""
-    try:
-        data = request.get_json()
-        provider = data.get('provider')
-        items = data.get('items', [])
-
-        if not provider:
-            return error_response("provider is required")
-
-        wiremock_url = f"{Config.WIREMOCK_URL}/provider/{provider}"
-        response = requests.post(wiremock_url, json=items, timeout=5)
-
-        return success_response()
-    except requests.exceptions.RequestException as e:
-        app.logger.error(f"WireMock request error: {e}")
-        return error_response("Look for 'WireMock request error' in logs")
-    except Exception as e:
-        app.logger.error(f"Error in purchase_from_provider: {e}")
-        abort(500, description="Look for 'Error in purchase_from_provider' in logs")
 
 
 # ============= HEALTH CHECK =============

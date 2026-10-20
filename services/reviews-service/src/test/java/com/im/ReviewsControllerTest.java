@@ -1,7 +1,6 @@
 package com.im;
 
 import com.im.repository.ReviewRepository;
-import com.im.repository.ReviewItemRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +24,6 @@ public class ReviewsControllerTest {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
-    @Autowired
-    private ReviewItemRepository reviewItemRepository;
 
     @Test
     public void testGetAllReviewsReturns200() throws Exception {
@@ -60,39 +56,6 @@ public class ReviewsControllerTest {
     @Disabled("This test is broken and will be fixed later")
     public void testDeleteReviewReturns200() throws Exception {
         mockMvc.perform(delete("/review/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("deleted"));
-    }
-
-    @Test
-    public void testGetReviewItemsReturns200() throws Exception {
-        mockMvc.perform(get("/review/1/item"))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    @Disabled("This test is broken and will be fixed later")
-    public void testPostReviewItemReturnsAddedStatus() throws Exception {
-        String payload = """
-            {
-                "review_item_id": 1,
-                "review_id": 1,
-                "item_id": 1,
-                "quantity": 50
-            }
-            """;
-        
-        mockMvc.perform(post("/review/1/item/1")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(payload))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("added"));
-    }
-
-    @Test
-    @Disabled("This test is broken and will be fixed later")
-    public void testDeleteReviewItemReturns200() throws Exception {
-        mockMvc.perform(delete("/review/1/item/1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("deleted"));
     }

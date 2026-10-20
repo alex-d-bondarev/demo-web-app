@@ -1,6 +1,6 @@
 # Reviews Service
 
-Manage inventory reviews and review items.
+Manage inventory reviews (audit).
 For database see [database README.md](../../database/README.md)
 
 ## Running Locally

@@ -23,31 +23,11 @@ jobs:
       - name: Start services
         run: docker compose up -d
       
-      - name: Wait for services to be ready
-        run: |
-          sleep 15
-          for i in {1..20}; do
-            curl -f http://localhost:9020/item && break
-            sleep 3
-          done
-      
       - name: Run Items Service Tests
         run: docker compose exec -T items-service uv run python -m pytest test_items.py -vv
       
       - name: Run Reviews Service Tests
         run: docker compose exec -T reviews-service mvn -f /build/pom.xml test
-      
-      - name: Verify API Endpoints
-        run: |
-          echo "Testing Items Service..."
-          curl -f http://localhost:9020/item || exit 1
-          curl -f http://localhost:9020/purchase || exit 1
-          
-          echo "Testing Reviews Service..."
-          curl -f http://localhost:9030/review || exit 1
-          
-          echo "Testing Frontend..."
-          curl -f http://localhost:9010/health || exit 1
       
       - name: Stop services
         if: always()

@@ -17,8 +17,3 @@ class Config:
     FLASK_ENV = os.getenv('FLASK_ENV', 'development')
     FLASK_PORT = os.getenv('FLASK_PORT', 9020)
     DEBUG = FLASK_ENV == 'development'
-    
-    @staticmethod
-    def get_db_connection_string():
-        """Get MySQL connection string"""
-        return f"mysql+pymysql://{Config.DB_USER}:{Config.DB_PASSWORD}@{Config.DB_HOST}:{Config.DB_PORT}/{Config.DB_NAME}"
