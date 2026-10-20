@@ -40,7 +40,6 @@
                             <td>${review.end_dt}</td>
                             <td>
                                 <button class="btn-primary" onclick="window.location.href = '/reviews/edit/${review.review_id}';">Edit</button>
-                                <button class="btn-secondary" onclick="viewReview(${review.review_id})">Items (TBD)</button>
                                 <button class="btn-danger" onclick="deleteReview(${review.review_id})">Delete</button>
                             </td>
                         </tr>
@@ -50,105 +49,6 @@
                 document.getElementById('reviewsTable').innerHTML = html;
             } else {
                 document.getElementById('reviewsTable').innerHTML = '<p>Error loading reviews</p>';
-            }
-        }
-        
-        // View review items
-        async function viewReview(reviewId) {
-            const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}/item`);
-            
-            if (result.success) {
-                const items = result.data || [];
-                let html = `
-                    <div class="container" style="margin-top: 1rem;">
-                        <h3>Review #${reviewId} Items</h3>
-                `;
-                
-                if (items.length > 0) {
-                    html += '<table><thead><tr><th>Item ID</th><th>Review Item ID</th><th>Quantity</th><th>Action</th></tr></thead><tbody>';
-                    items.forEach(item => {
-                        html += `
-                            <tr>
-                                <td>${item.item_id}</td>
-                                <td>${item.review_item_id}</td>
-                                <td>${item.quantity}</td>
-                                <td>
-                                    <button class="btn-danger" onclick="deleteReviewItem(${reviewId}, ${item.review_item_id})">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    html += '</tbody></table>';
-                } else {
-                    html += '<p>No items in this review</p>';
-                }
-                
-                html += `
-                    <h4 style="margin-top: 1.5rem;">Add Item to Review</h4>
-                    <form id="addReviewItemForm">
-                        <div class="form-group">
-                            <label for="ri_id">Review Item ID</label>
-                            <input type="number" id="ri_id" name="ri_id" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="item_id">Item ID</label>
-                            <input type="number" id="item_id" name="item_id" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="quantity">Quantity</label>
-                            <input type="number" id="quantity" name="quantity" required>
-                        </div>
-                        <button type="submit" class="btn-primary">Add Item</button>
-                    </form>
-                    
-                    <button class="btn-secondary" onclick="loadReviews(); document.querySelectorAll('.container')[1].remove();">Back</button>
-                    </div>
-                `;
-                
-                document.getElementById('reviewsTable').insertAdjacentHTML('afterend', html);
-                
-                document.getElementById('addReviewItemForm').onsubmit = async (e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.target);
-                    const data = {
-                        review_item_id: parseInt(formData.get('ri_id')),
-                        review_id: reviewId,
-                        item_id: parseInt(formData.get('item_id')),
-                        quantity: parseInt(formData.get('quantity'))
-                    };
-                    
-                    const addResult = await API.fetchAPI(
-                        `${REVIEWS_URL}/review/${reviewId}/item/${data.review_item_id}`,
-                        {
-                            method: 'POST',
-                            body: JSON.stringify(data)
-                        }
-                    );
-                    
-                    if (addResult.success && addResult.data.status === 'added') {
-                        API.showMessage('Item added to review!', 'success');
-                        e.target.reset();
-                    } else {
-                        API.showMessage('Error adding item', 'error');
-                    }
-                };
-            }
-        }
-        
-        // Delete review item
-        async function deleteReviewItem(reviewId, itemId) {
-            if (!confirm('Delete this item from review?')) return;
-            
-            const result = await API.fetchAPI(
-                `${REVIEWS_URL}/review/${reviewId}/item/${itemId}`,
-                { method: 'DELETE' }
-            );
-            
-            if (result.success && result.data.status === 'deleted') {
-                API.showMessage('Item deleted from review', 'success');
-                await viewReview(reviewId);
-            } else {
-                API.showMessage('Error deleting item', 'error');
             }
         }
         

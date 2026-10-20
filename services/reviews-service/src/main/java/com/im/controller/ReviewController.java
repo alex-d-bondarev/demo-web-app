@@ -1,9 +1,7 @@
 package com.im.controller;
 
 import com.im.model.Review;
-import com.im.model.ReviewItem;
 import com.im.repository.ReviewRepository;
-import com.im.repository.ReviewItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +26,6 @@ public class ReviewController {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
-    @Autowired
-    private ReviewItemRepository reviewItemRepository;
 
     // ============= REVIEW ENDPOINTS =============
 
@@ -108,58 +103,6 @@ public class ReviewController {
     public ResponseEntity<?> deleteReview(@PathVariable Integer review_id) {
         try {
             reviewRepository.deleteById(review_id);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "deleted");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
-    // ============= REVIEW ITEM ENDPOINTS =============
-
-    /**
-     * GET /review/{review_id}/item - Get all review items for a review
-     */
-    @GetMapping("/review/{review_id}/item")
-    public ResponseEntity<?> getReviewItems(@PathVariable Integer review_id) {
-        try {
-            List<ReviewItem> reviewItems = reviewItemRepository.findByReviewId(review_id);
-            return ResponseEntity.ok(reviewItems);
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
-    /**
-     * POST /review/{review_id}/item/{review_item_id} - Add item to review
-     */
-    @PostMapping("/review/{review_id}/item/{review_item_id}")
-    @Transactional
-    public ResponseEntity<?> addReviewItem(
-            @PathVariable Integer review_id,
-            @PathVariable Integer review_item_id,
-            @RequestBody ReviewItem reviewItem) {
-        try {
-            reviewItemRepository.save(reviewItem);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "added");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
-    /**
-     * DELETE /review/{review_id}/item/{review_item_id} - Delete review item
-     */
-    @DeleteMapping("/review/{review_id}/item/{review_item_id}")
-    @Transactional
-    public ResponseEntity<?> deleteReviewItem(
-            @PathVariable Integer review_id,
-            @PathVariable Integer review_item_id) {
-        try {
-            reviewItemRepository.deleteById(review_item_id);
             Map<String, String> response = new HashMap<>();
             response.put("status", "deleted");
             return ResponseEntity.ok(response);
