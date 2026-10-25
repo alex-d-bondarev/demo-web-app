@@ -129,7 +129,7 @@ jobs:
       - name: Build and Push Frontend Service
         uses: docker/build-push-action@v5
         with:
-          context: ./services/frontend # Adjust context path if frontend is at root `./frontend`
+          context: ./frontend
           file: ./frontend/Dockerfile
           push: true
           tags: |
