@@ -115,6 +115,9 @@ jobs:
           tags: |
             ghcr.io/${{ steps.string_transform.outputs.OWNER_LC }}/items-service:${{ steps.versioning.outputs.new_tag }}
             ghcr.io/${{ steps.string_transform.outputs.OWNER_LC }}/items-service:latest
+          annotations: |
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/main/services/items-service/README.md
+            org.opencontainers.image.description="Items Service (Python/Flask) for the Demo application"
 
       - name: Build and Push Reviews Service
         uses: docker/build-push-action@v5
@@ -125,6 +128,9 @@ jobs:
           tags: |
             ghcr.io/${{ steps.string_transform.outputs.OWNER_LC }}/reviews-service:${{ steps.versioning.outputs.new_tag }}
             ghcr.io/${{ steps.string_transform.outputs.OWNER_LC }}/reviews-service:latest
+          annotations: |
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/main/services/reviews-service/README.md
+            org.opencontainers.image.description="Reviews Service (Java/Spring) for the Demo application"
 
       - name: Build and Push Frontend Service
         uses: docker/build-push-action@v5
@@ -135,3 +141,6 @@ jobs:
           tags: |
             ghcr.io/${{ steps.string_transform.outputs.OWNER_LC }}/frontend:${{ steps.versioning.outputs.new_tag }}
             ghcr.io/${{ steps.string_transform.outputs.OWNER_LC }}/frontend:latest
+          annotations: |
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/main/frontend/README.md
+            org.opencontainers.image.description="Frontend (Node) for the Demo application"
