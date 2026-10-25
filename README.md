@@ -5,12 +5,12 @@ inventory items, purchase orders, and inventory reviews/audit.
 
 ## Technology Stack
 
-- **Frontend**: Node.js + Express + Vanilla JavaScript
-- **Items Service**: Python 3.11 + Flask
-- **Reviews Service**: Java 17 + Spring Boot
-- **Database**: MySQL 8.0
-- **Mocking**: WireMock
-- **Containerization**: Docker + Docker Compose
+- 📦 **[Frontend Service](./frontend/README.md)**: Node.js + Express + Vanilla JavaScript
+- 📦 **[Items Service](./services/items-service/README.md)**: Python 3.14 + Flask
+- 📦 **[Reviews Service](./services/reviews-service/README.md)**: Java 17 + Spring Boot
+- 📦 **[Database](./database/README.md)**:: MySQL 8.0
+- 📦 **[Mocking](./wiremock/README.md)**:: WireMock
+- **Containerization**: Docker + Docker Compose + GHCR
 - **CI/CD**: GitHub Actions
 
 ## Quick Start
