@@ -10,6 +10,7 @@
     [x] Remove purchase_order till it is used again
     [x] Remove purchase_order_item till it is used again
 [ ] Try to deploy to other laptop with basic k8s
+[ ] Install Grafana and Prometheus
 [ ] Review existing functionality
 [ ] Add wiremock logic:
     [ ] Providers have lists of items for items-service
@@ -19,7 +20,6 @@
 [ ] Move logic from `app.py` to a new "service" layer
 [ ] Install [Kiwi TCMS](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html#example-with-docker-compose)
 [ ] Write down tests in Kiwi
-[ ] Install Grafana and Prometheus
 [ ] Make services report metrics to Grafana (tps, feature, response time, etc)
 [ ] Push existing test metrics to Prometheus
 [ ] Create test dashboard

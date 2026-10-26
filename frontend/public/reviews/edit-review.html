@@ -48,8 +48,9 @@
     </main>
     
     <script src="/app.js"></script>
+    <script src="/config.js"></script>
     <script>
-        const REVIEWS_URL = window.location.protocol + '//' + window.location.hostname + ':9030';
+        const REVIEWS_URL = window.APP_CONFIG?.REVIEWS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9030');
         
         // Extract review ID from URL path
         const pathParts = window.location.pathname.split('/');

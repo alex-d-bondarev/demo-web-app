@@ -7,15 +7,15 @@ const API_CONFIG = {
 
 // Get URLs from window location for browser-based requests
 function getItemsServiceUrl() {
-    return window.location.protocol + '//' + window.location.hostname + ':9020';
+    return window.APP_CONFIG?.ITEMS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9020');
 }
 
 function getReviewsServiceUrl() {
-    return window.location.protocol + '//' + window.location.hostname + ':9030';
+    return window.APP_CONFIG?.REVIEWS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9030');
 }
 
 function getWiremockUrl() {
-    return window.location.protocol + '//' + window.location.hostname + ':9040';
+    return window.APP_CONFIG?.WIREMOCK_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9040');
 }
 
 /**
