@@ -56,8 +56,9 @@
     </main>
     
     <script src="/app.js"></script>
+    <script src="/config.js"></script>
     <script>
-        const ITEMS_URL = window.location.protocol + '//' + window.location.hostname + ':9020';
+        const ITEMS_URL = window.APP_CONFIG?.ITEMS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9020');
         
         function showSuccessModal() {
             document.getElementById('successModal').classList.remove('hidden');

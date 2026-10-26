@@ -128,8 +128,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      ITEMS_SERVICE_URL: http://items-service:${ITEMS_PORT:-9020}
-      REVIEWS_SERVICE_URL: http://reviews-service:${REVIEWS_PORT:-9030}
+      ITEMS_SERVICE_URL: http://127.0.0.1:${ITEMS_PORT:-9020}
+      REVIEWS_SERVICE_URL: http://127.0.0.1:${REVIEWS_PORT:-9030}
+      WIREMOCK_SERVICE_URL: http://127.0.0.1:${WIREMOCK_PORT:-9040}
       NODE_ENV: development
     ports:
       - "${FRONTEND_PORT:-9010}:${FRONTEND_PORT:-9010}"

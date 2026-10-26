@@ -4,12 +4,25 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 9010;
 
+// Read env vars ONCE at startup (injected via docker-compose .env or K8s ConfigMap/Helm)
 const ITEMS_SERVICE_URL = process.env.ITEMS_SERVICE_URL || 'http://localhost:9020';
 const REVIEWS_SERVICE_URL = process.env.REVIEWS_SERVICE_URL || 'http://localhost:9030';
+const WIREMOCK_SERVICE_URL = process.env.WIREMOCK_SERVICE_URL || 'http://localhost:9040';
 
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Config endpoint - serves static config from startup env vars (browser caches this)
+app.get('/config.js', (req, res) => {
+    const config = {
+        ITEMS_SERVICE_URL,
+        REVIEWS_SERVICE_URL,
+        WIREMOCK_SERVICE_URL
+    };
+    res.set('Content-Type', 'application/javascript');
+    res.send(`window.APP_CONFIG = ${JSON.stringify(config)};`);
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -82,4 +95,5 @@ app.listen(PORT, () => {
     console.log(`IM Frontend Service running on port ${PORT}`);
     console.log(`Items Service: ${ITEMS_SERVICE_URL}`);
     console.log(`Reviews Service: ${REVIEWS_SERVICE_URL}`);
+    console.log(`WireMock Service: ${WIREMOCK_SERVICE_URL}`);
 });
