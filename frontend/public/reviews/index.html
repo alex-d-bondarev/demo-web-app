@@ -24,11 +24,11 @@
     <script src="/app.js"></script>
     <script src="/config.js"></script>
     <script>
-        const REVIEWS_URL = window.APP_CONFIG?.REVIEWS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9030');
+        // Reviews API is proxied by the frontend to the internal reviews-service
         
         // Load reviews
         async function loadReviews() {
-            const result = await API.fetchAPI(`${REVIEWS_URL}/review`);
+            const result = await API.fetchAPI(`/api/reviews/review`);
             
             if (result.success && Array.isArray(result.data)) {
                 let html = '<table><thead><tr><th>Review ID</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Actions</th></tr></thead><tbody>';
@@ -57,7 +57,7 @@
         async function deleteReview(reviewId) {
             if (!confirm(`Delete review ${reviewId}?`)) return;
             
-            const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}`, {
+            const result = await API.fetchAPI(`/api/reviews/review/${reviewId}`, {
                 method: 'DELETE'
             });
             

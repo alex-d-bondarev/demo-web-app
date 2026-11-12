@@ -50,7 +50,7 @@
     <script src="/app.js"></script>
     <script src="/config.js"></script>
     <script>
-        const REVIEWS_URL = window.APP_CONFIG?.REVIEWS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9030');
+        // Reviews API is proxied by the frontend to the internal reviews-service
         
         // Extract review ID from URL path
         const pathParts = window.location.pathname.split('/');
@@ -60,7 +60,7 @@
         
         async function loadReview() {
             try {
-                const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}`);
+                const result = await API.fetchAPI(`/api/reviews/review/${reviewId}`);
                 
                 if (result.success && result.data) {
                     originalData = result.data;
@@ -121,7 +121,7 @@
             };
             
             try {
-                const result = await API.fetchAPI(`${REVIEWS_URL}/review/${reviewId}`, {
+                const result = await API.fetchAPI(`/api/reviews/review/${reviewId}`, {
                     method: 'PUT',
                     body: JSON.stringify(data)
                 });

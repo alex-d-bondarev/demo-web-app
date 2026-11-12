@@ -58,7 +58,7 @@
     <script src="/app.js"></script>
     <script src="/config.js"></script>
     <script>
-        const ITEMS_URL = window.APP_CONFIG?.ITEMS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9020');
+        // Items API is proxied by the frontend to the internal items-service
         
         function showSuccessModal() {
             document.getElementById('successModal').classList.remove('hidden');
@@ -95,7 +95,7 @@
                 weight: parseFloat(formData.get('weight'))
             };
             
-            const result = await API.fetchAPI(`${ITEMS_URL}/item`, {
+            const result = await API.fetchAPI(`/api/items/item`, {
                 method: 'POST',
                 body: JSON.stringify(data)
             });
