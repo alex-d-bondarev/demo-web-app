@@ -1,4 +1,5 @@
 const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
 
 const app = express();
@@ -12,6 +13,19 @@ const WIREMOCK_SERVICE_URL = process.env.WIREMOCK_SERVICE_URL || 'http://localho
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// API proxy - forward browser requests to internal services via relative paths
+app.use('/api/items', createProxyMiddleware({
+    target: process.env.ITEMS_SERVICE_URL || 'http://items-service:9020',
+    changeOrigin: true,
+    pathRewrite: { '^/api/items': '' }
+}));
+
+app.use('/api/reviews', createProxyMiddleware({
+    target: process.env.REVIEWS_SERVICE_URL || 'http://reviews-service:9030',
+    changeOrigin: true,
+    pathRewrite: { '^/api/reviews': '' }
+}));
 
 // Config endpoint - serves static config from startup env vars (browser caches this)
 app.get('/config.js', (req, res) => {

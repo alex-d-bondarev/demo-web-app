@@ -23,11 +23,11 @@
     <script src="/app.js"></script>
     <script src="/config.js"></script>
     <script>
-        const ITEMS_URL = window.APP_CONFIG?.ITEMS_SERVICE_URL || (window.location.protocol + '//' + window.location.hostname + ':9020');
+        // Items API is proxied by the frontend to the internal items-service
         
         // Load items
         async function loadItems() {
-            const result = await API.fetchAPI(`${ITEMS_URL}/item`);
+            const result = await API.fetchAPI(`/api/items/item`);
             
             if (result.success && Array.isArray(result.data)) {
                 let html = '<table><thead><tr><th>Item ID</th><th>Name</th><th>Action</th></tr></thead><tbody>';
@@ -52,7 +52,7 @@
         
         // View item details
         async function viewItem(itemId) {
-            const result = await API.fetchAPI(`${ITEMS_URL}/item/${itemId}`);
+            const result = await API.fetchAPI(`/api/items/item/${itemId}`);
             
             if (result.success) {
                 const item = result.data;
@@ -79,7 +79,7 @@
         async function deleteItem(itemId) {
             if (!confirm(`Delete item ${itemId}?`)) return;
             
-            const result = await API.fetchAPI(`${ITEMS_URL}/item/${itemId}`, {
+            const result = await API.fetchAPI(`/api/items/item/${itemId}`, {
                 method: 'DELETE'
             });
             
